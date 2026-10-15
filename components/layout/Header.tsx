@@ -1,0 +1,87 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Icon } from "@/components/Icon";
+import { nav } from "@/content/site";
+
+export function Header() {
+  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPath, setMenuPath] = useState(pathname);
+
+  // Close the mobile menu whenever the route changes.
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
+    setMenuOpen(false);
+  }
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // The original CSS drives the mobile menu from a class on <body>.
+  useEffect(() => {
+    document.body.classList.toggle("menu-open", menuOpen);
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+
+  const links = nav.map((item) => (
+    <Link
+      key={item.href}
+      href={item.href}
+      className={isActive(item.href) ? "active" : undefined}
+      aria-current={isActive(item.href) ? "page" : undefined}
+    >
+      {item.label}
+    </Link>
+  ));
+
+  return (
+    <>
+      <header className={scrolled ? "hdr scrolled" : "hdr"}>
+        <div className="wrap">
+          <Link href="/" className="logo" aria-label="BrandSparkX home">
+            <Image src="/brand/logo.webp" alt="BrandSparkX" width={204} height={28} priority />
+          </Link>
+          <nav className="nav" aria-label="Primary">
+            {links}
+          </nav>
+          <Link href="/contact" className="btn btn-red">
+            Talk to Us <Icon name="i-arrow" />
+          </Link>
+          <button
+            type="button"
+            className="burger"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="mnav"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <span />
+          </button>
+        </div>
+      </header>
+      <nav className="mnav" id="mnav" aria-label="Mobile">
+        {links}
+        <Link href="/contact" className="btn btn-red">
+          Book a Strategy Call
+        </Link>
+      </nav>
+    </>
+  );
+}
