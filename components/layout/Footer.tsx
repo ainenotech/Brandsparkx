@@ -24,6 +24,10 @@ const footerSolutions = [
 export function Footer() {
   return (
     <footer className="ftr">
+      <div className="ftr-brand-bg" aria-hidden="true">
+        <span>BRANDSPARKX</span>
+      </div>
+
       <div className="skyline" aria-hidden="true">
         <svg viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice">
           <g fill="#16161C">

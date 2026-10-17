@@ -391,9 +391,9 @@ section {
 
 /* HERO */
 .hero {
-  padding: clamp(40px, 6vw, 80px) 0 clamp(70px, 8vw, 110px);
+  padding: clamp(40px, 6vw, 80px) 0 clamp(80px, 10vw, 140px);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 .hero-grid {
   display: grid;
@@ -2325,12 +2325,36 @@ fieldset.fld {
   width: 100%;
   height: 100%;
 }
+/* Big outlined brand watermark inside footer */
+.ftr-brand-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 64px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.ftr-brand-bg span {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(64px, 11vw, 160px);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255,255,255,0.13);
+  user-select: none;
+}
 .ftr-top {
   display: grid;
   grid-template-columns: 1.3fr 1.2fr 0.9fr 0.8fr;
   gap: clamp(28px, 4vw, 56px);
-  padding: clamp(70px, 8vw, 100px) 0 clamp(120px, 14vw, 200px);
+  padding: clamp(70px, 8vw, 100px) 0 clamp(100px, 12vw, 160px);
   position: relative;
+  z-index: 1;
 }
 .ftr .flogo {
   display: inline-block;
