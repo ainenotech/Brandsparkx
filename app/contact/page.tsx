@@ -33,7 +33,7 @@ export default function ContactPage() {
         <div className="wrap cgrid">
           <ContactForm />
           <aside className="cside">
-            <div className="card dark">
+            <div className="card dark orange-hover-glow">
               <b>Primary contact</b>
               <p style={{ color: "#fff", fontWeight: 600, fontSize: "1.05rem" }}>
                 {site.primaryContact.name}

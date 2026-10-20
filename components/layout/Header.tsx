@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Icon } from "@/components/Icon";
 import { nav } from "@/content/site";
 
 export function Header() {
@@ -40,16 +39,19 @@ export function Header() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
-  const links = nav.map((item) => (
-    <Link
-      key={item.href}
-      href={item.href}
-      className={isActive(item.href) ? "active" : undefined}
-      aria-current={isActive(item.href) ? "page" : undefined}
-    >
-      {item.label}
-    </Link>
-  ));
+  const linkClass = (href: string) => (isActive(href) ? "active" : undefined);
+
+  const renderNavigationLinks = () =>
+    nav.map((item) => (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={linkClass(item.href)}
+        aria-current={isActive(item.href) ? "page" : undefined}
+      >
+        {item.label}
+      </Link>
+    ));
 
   return (
     <>
@@ -59,11 +61,8 @@ export function Header() {
             <Image src="/brand/logo.webp" alt="BrandSparkX" width={204} height={28} priority />
           </Link>
           <nav className="nav" aria-label="Primary">
-            {links}
+            {renderNavigationLinks()}
           </nav>
-          <Link href="/contact" className="btn btn-red">
-            Talk to Us <Icon name="i-arrow" />
-          </Link>
           <button
             type="button"
             className="burger"
@@ -77,10 +76,7 @@ export function Header() {
         </div>
       </header>
       <nav className="mnav" id="mnav" aria-label="Mobile">
-        {links}
-        <Link href="/contact" className="btn btn-red">
-          Book a Strategy Call
-        </Link>
+        {renderNavigationLinks()}
       </nav>
     </>
   );

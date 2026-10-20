@@ -25,7 +25,13 @@ export function Footer() {
   return (
     <footer className="ftr">
       <div className="ftr-brand-bg" aria-hidden="true">
-        <span>BRANDSPARKX</span>
+        <span>
+          {"BRANDSPARKX".split("").map((letter, index) => (
+            <span key={`${letter}-${index}`} aria-hidden="true">
+              {letter}
+            </span>
+          ))}
+        </span>
       </div>
 
       <div className="skyline" aria-hidden="true">

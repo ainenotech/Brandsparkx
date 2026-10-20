@@ -57,10 +57,11 @@ export const site = {
 
 export const nav = [
   { href: "/", label: "Home" },
-  { href: "/solutions", label: "Solutions" },
+  { href: "/services", label: "Services" },
   { href: "/ai-voice-calling", label: "AI Voice & Calling" },
   { href: "/ai-engineers", label: "AI Engineers" },
   { href: "/work", label: "Work" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+  { href: "/solutions", label: "Solutions" },
+  { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact Us" },
 ] as const;
