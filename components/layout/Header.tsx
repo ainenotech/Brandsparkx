@@ -56,7 +56,13 @@ export function Header() {
   return (
     <>
       <header className={scrolled ? "hdr scrolled" : "hdr"}>
-        <div className="wrap">
+        <div
+          className="wrap"
+          style={{
+            backdropFilter: "saturate(1.45) blur(18px)",
+            WebkitBackdropFilter: "saturate(1.45) blur(18px)",
+          }}
+        >
           <Link href="/" className="logo" aria-label="BrandSparkX home">
             <Image src="/brand/logo.webp" alt="BrandSparkX" width={204} height={28} priority />
           </Link>

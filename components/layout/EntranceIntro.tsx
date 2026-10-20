@@ -33,6 +33,7 @@ export function EntranceIntro() {
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let finishTimer: number | undefined;
+    let resizeHandoff: (() => void) | undefined;
     const startTimer = window.setTimeout(() => {
       if (!root.hasAttribute("data-brand-intro-pending")) return;
       try {
@@ -41,6 +42,29 @@ export function EntranceIntro() {
         finishIntro();
         return;
       }
+      const updateHandoff = () => {
+        const mark = document.querySelector<HTMLElement>(".brand-intro__mark");
+        const logo = document.querySelector<HTMLImageElement>(".hdr .logo img");
+        if (!mark || !logo) return;
+        const logoBounds = logo.getBoundingClientRect();
+        const markWidth = mark.offsetWidth || Math.min(window.innerWidth * 0.86, 480);
+        if (!logoBounds.width || !markWidth) return;
+        mark.style.setProperty(
+          "--brand-intro-handoff-x",
+          `${logoBounds.left + logoBounds.width / 2 - window.innerWidth / 2}px`,
+        );
+        mark.style.setProperty(
+          "--brand-intro-handoff-y",
+          `${logoBounds.top + logoBounds.height / 2 - window.innerHeight / 2}px`,
+        );
+        mark.style.setProperty(
+          "--brand-intro-handoff-scale",
+          `${logoBounds.width / markWidth}`,
+        );
+      };
+      updateHandoff();
+      window.addEventListener("resize", updateHandoff);
+      resizeHandoff = updateHandoff;
       document.body.classList.add("brand-intro-active");
       finishTimer = window.setTimeout(
         finishIntro,
@@ -50,6 +74,7 @@ export function EntranceIntro() {
 
     return () => {
       window.clearTimeout(startTimer);
+      if (resizeHandoff) window.removeEventListener("resize", resizeHandoff);
       if (finishTimer !== undefined) {
         window.clearTimeout(finishTimer);
         finishIntro();
@@ -59,6 +84,16 @@ export function EntranceIntro() {
 
   return (
     <div className="brand-intro" aria-hidden="true">
+      <span className="brand-intro__x-stinger">
+        <Image
+          src="/brand/intro-x.png"
+          alt=""
+          width={152}
+          height={127}
+          priority
+          unoptimized
+        />
+      </span>
       <div className="brand-intro__mark">
         <span className="brand-intro__wordmark">
           <Image
@@ -72,7 +107,7 @@ export function EntranceIntro() {
             onError={finishIntro}
           />
         </span>
-        <span className="brand-intro__x">
+        <span className="brand-intro__x brand-intro__x--assembly">
           <Image
             src="/brand/intro-x.png"
             alt=""

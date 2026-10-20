@@ -73,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       window.setTimeout(() => {
         root.removeAttribute("data-brand-intro-pending");
         delete root.dataset.brandIntroFallback;
-      }, 6200),
+      }, 5500),
     );
   }
 } catch {}`}
