@@ -70,7 +70,7 @@ export function Header() {
           }}
         >
           <Link href="/" className="logo" aria-label="BrandSparkX home">
-            <Image src="/brand/logo.webp" alt="BrandSparkX" width={204} height={28} priority />
+            <Image src="/brand/logo.webp" alt="BrandSparkX" width={204} height={28} priority style={{ width: 'auto', height: 'auto' }} />
           </Link>
           <nav className="nav" aria-label="Primary">
             {renderNavigationLinks()}

@@ -69,7 +69,7 @@ export function Footer() {
       <div className="wrap ftr-top">
         <div>
           <Link href="/" className="flogo" aria-label="BrandSparkX home">
-            <Image src="/brand/logo-light.webp" alt="BrandSparkX" width={190} height={26} />
+            <Image src="/brand/logo-light.webp" alt="BrandSparkX" width={190} height={26} style={{ width: 'auto', height: 'auto' }} />
           </Link>
           <div className="tagl">
             Build. Automate.
