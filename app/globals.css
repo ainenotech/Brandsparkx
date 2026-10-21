@@ -223,11 +223,11 @@ section {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: min(calc(100% - clamp(24px, 3.2vw, 56px)), 1760px);
+  width: min(calc(100% - clamp(32px, 6vw, 80px)), 1320px);
   max-width: none;
   height: 68px;
-  gap: clamp(16px, 2vw, 32px);
-  padding: 0 clamp(18px, 2.8vw, 42px);
+  gap: clamp(10px, 1.35vw, 20px);
+  padding: 0 clamp(16px, 2vw, 28px);
   border: 1px solid rgba(255, 255, 255, 0.78);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.62);
@@ -252,7 +252,7 @@ section {
 }
 .nav {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   gap: clamp(0px, 0.45vw, 7px);
   align-items: center;
   flex: 1 1 auto;
@@ -292,6 +292,29 @@ section {
 .nav a:focus-visible::after,
 .nav a.active::after {
   transform: scaleX(1);
+}
+.nav a.nav-cta {
+  padding: 9px 15px;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-weight: 600;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.2s;
+}
+.nav a.nav-cta::after {
+  display: none;
+}
+.nav a.nav-cta:hover,
+.nav a.nav-cta:focus-visible,
+.nav a.nav-cta.active {
+  background: var(--red-d);
+  color: #fff;
+}
+.nav a.nav-cta:hover {
+  transform: translateY(-1px);
 }
 .burger {
   display: none;
@@ -368,6 +391,20 @@ section {
 }
 .mnav a.active {
   color: var(--red);
+}
+.mnav a.nav-cta {
+  justify-content: center;
+  margin-top: 16px;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--red);
+  color: #fff;
+}
+.mnav a.nav-cta.active,
+.mnav a.nav-cta:hover {
+  background: var(--red-d);
+  color: #fff;
 }
 @media (max-width: 1100px) {
   .nav {
@@ -2396,18 +2433,26 @@ fieldset.fld {
   white-space: nowrap;
   color: transparent;
   -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.13);
+  perspective: 700px;
+  transform-style: preserve-3d;
   user-select: none;
   pointer-events: auto;
 }
 .ftr-brand-bg span > span {
   display: inline-block;
+  transform: translateZ(0) scale(1);
   transition:
-    -webkit-text-stroke-color 0.2s ease,
-    -webkit-text-stroke-width 0.2s ease;
+    color 0.3s ease,
+    -webkit-text-stroke-color 0.3s ease,
+    -webkit-text-stroke-width 0.3s ease,
+    transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    text-shadow 0.3s ease;
 }
 .ftr-brand-bg span > span:hover {
-  -webkit-text-stroke-color: #ff9140;
+  -webkit-text-stroke-color: var(--red);
   -webkit-text-stroke-width: 2px;
+  transform: translateZ(24px) scale(1.08);
+  text-shadow: 0 0 22px rgba(216, 50, 50, 0.22);
 }
 .ftr-top {
   display: grid;
@@ -4296,30 +4341,27 @@ main:focus {
   display: none;
   place-items: center;
   overflow: hidden;
-  background: #000;
+  background: #fff;
   pointer-events: auto;
 }
 .brand-intro::before {
   position: absolute;
   inset: 0;
   content: "";
-  background: radial-gradient(
-    ellipse 32% 25% at 50% 50%,
-    rgba(168, 32, 43, 0.16),
-    rgba(88, 16, 24, 0.06) 48%,
-    transparent 78%
-  );
+  background:
+    radial-gradient(ellipse 36% 30% at 50% 50%, rgba(216, 50, 50, 0.09), transparent 76%),
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(16, 16, 20, 0.025), transparent 85%);
   opacity: 0;
   transform: scale(0.72);
 }
 html[data-brand-intro-pending] .brand-intro {
   display: grid;
 }
-body.brand-intro-active .brand-intro {
-  animation: brand-intro-exit 850ms ease-in 3950ms both;
+html[data-brand-intro-active] .brand-intro {
+  animation: brand-intro-exit 700ms ease-in 1700ms both;
 }
-body.brand-intro-active .brand-intro::before {
-  animation: brand-intro-ambience 3.8s ease-out both;
+html[data-brand-intro-active] .brand-intro::before {
+  animation: brand-intro-ambience 2.1s ease-out both;
 }
 .brand-intro__mark {
   position: relative;
@@ -4337,19 +4379,19 @@ body.brand-intro-active .brand-intro::before {
   background: linear-gradient(
     108deg,
     transparent 34%,
-    rgba(255, 255, 255, 0.24) 48%,
-    rgba(255, 255, 255, 0.08) 53%,
+    rgba(216, 50, 50, 0.09) 48%,
+    rgba(216, 50, 50, 0.025) 53%,
     transparent 68%
   );
-  mix-blend-mode: screen;
+  mix-blend-mode: multiply;
   opacity: 0;
   transform: translateX(-115%) skewX(-18deg);
 }
-body.brand-intro-active .brand-intro__mark {
-  animation: brand-intro-handoff 900ms cubic-bezier(0.22, 1, 0.36, 1) 3450ms both;
+html[data-brand-intro-active] .brand-intro__mark {
+  animation: brand-intro-handoff 650ms cubic-bezier(0.22, 1, 0.36, 1) 1450ms both;
 }
-body.brand-intro-active .brand-intro__mark::after {
-  animation: brand-intro-sheen 750ms ease-out 2450ms both;
+html[data-brand-intro-active] .brand-intro__mark::after {
+  animation: brand-intro-sheen 500ms ease-out 1050ms both;
 }
 .brand-intro__wordmark {
   position: absolute;
@@ -4409,20 +4451,20 @@ body.brand-intro-active .brand-intro__mark::after {
   opacity: 0;
   transform: scale(0.85);
 }
-body.brand-intro-active .brand-intro__x img {
-  animation: brand-intro-x-appear 500ms cubic-bezier(0.16, 1, 0.3, 1) 850ms both;
+html[data-brand-intro-active] .brand-intro__x img {
+  animation: brand-intro-x-appear 400ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both;
 }
-body.brand-intro-active .brand-intro__x {
-  animation: brand-intro-x-slide 1350ms cubic-bezier(0.22, 1, 0.36, 1) 900ms both;
+html[data-brand-intro-active] .brand-intro__x {
+  animation: brand-intro-x-slide 900ms cubic-bezier(0.22, 1, 0.36, 1) 400ms both;
 }
-body.brand-intro-active .brand-intro__x-stinger img {
-  animation: brand-intro-x-stinger 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+html[data-brand-intro-active] .brand-intro__x-stinger img {
+  animation: brand-intro-x-stinger 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-body.brand-intro-active .brand-intro__x::before {
-  animation: brand-intro-x-glow 2.5s ease-out 850ms both;
+html[data-brand-intro-active] .brand-intro__x::before {
+  animation: brand-intro-x-glow 1.8s ease-out 200ms both;
 }
-body.brand-intro-active .brand-intro__wordmark {
-  animation: brand-intro-wordmark-reveal 1350ms cubic-bezier(0.22, 1, 0.36, 1) 900ms both;
+html[data-brand-intro-active] .brand-intro__wordmark {
+  animation: brand-intro-wordmark-reveal 900ms cubic-bezier(0.22, 1, 0.36, 1) 400ms both;
 }
 @keyframes brand-intro-ambience {
   0% {
@@ -4525,32 +4567,32 @@ body.brand-intro-active .brand-intro__wordmark {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  body.brand-intro-active .brand-intro {
+  html[data-brand-intro-active] .brand-intro {
     animation: brand-intro-exit 250ms ease-in 150ms both !important;
   }
-  body.brand-intro-active .brand-intro::before,
-  body.brand-intro-active .brand-intro__mark::after,
-  body.brand-intro-active .brand-intro__x::before,
-  body.brand-intro-active .brand-intro__x-stinger img {
+  html[data-brand-intro-active] .brand-intro::before,
+  html[data-brand-intro-active] .brand-intro__mark::after,
+  html[data-brand-intro-active] .brand-intro__x::before,
+  html[data-brand-intro-active] .brand-intro__x-stinger img {
     animation: none !important;
   }
-  body.brand-intro-active .brand-intro__mark {
+  html[data-brand-intro-active] .brand-intro__mark {
     animation: none !important;
   }
-  body.brand-intro-active .brand-intro__x {
+  html[data-brand-intro-active] .brand-intro__x {
     animation: none !important;
     transform: translate(calc(-50% + min(35.4vw, 200px)), -50%);
   }
-  body.brand-intro-active .brand-intro__x img {
+  html[data-brand-intro-active] .brand-intro__x img {
     animation: none !important;
     opacity: 1;
     transform: none;
   }
-  body.brand-intro-active .brand-intro__wordmark {
+  html[data-brand-intro-active] .brand-intro__wordmark {
     animation: none !important;
     clip-path: inset(0);
   }
-  body.brand-intro-active .brand-intro__x-stinger {
+  html[data-brand-intro-active] .brand-intro__x-stinger {
     display: none;
   }
 }

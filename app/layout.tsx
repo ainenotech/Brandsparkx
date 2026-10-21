@@ -65,18 +65,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <Script id="brand-intro-gate" strategy="beforeInteractive">
-          {`try {
-  if (!sessionStorage.getItem("brandsparkx-intro-played")) {
-    const root = document.documentElement;
-    root.dataset.brandIntroPending = "true";
-    root.dataset.brandIntroFallback = String(
-      window.setTimeout(() => {
-        root.removeAttribute("data-brand-intro-pending");
-        delete root.dataset.brandIntroFallback;
-      }, 5500),
-    );
-  }
-} catch {}`}
+          {`const root = document.documentElement;
+root.dataset.brandIntroPending = "true";
+          root.dataset.brandIntroActive = "true";
+          root.dataset.brandIntroFallback = String(
+  window.setTimeout(() => {
+    root.removeAttribute("data-brand-intro-pending");
+              root.removeAttribute("data-brand-intro-active");
+              delete root.dataset.brandIntroFallback;
+              document.body.classList.remove("brand-intro-active");
+  }, 3200),
+);`}
         </Script>
         <a href="#main" className="sr skip">
           Skip to content

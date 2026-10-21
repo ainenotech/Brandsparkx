@@ -39,7 +39,13 @@ export function Header() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
-  const linkClass = (href: string) => (isActive(href) ? "active" : undefined);
+  const linkClass = (href: string) =>
+    [
+      isActive(href) ? "active" : "",
+      href === "/contact" ? "nav-cta" : "",
+    ]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   const renderNavigationLinks = () =>
     nav.map((item) => (

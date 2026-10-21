@@ -20,7 +20,7 @@ export const site = {
   tagline: "Build. Automate. Grow with AI.",
   description:
     "AI growth & automation for ambitious businesses — strategy, automation, engineering and AI voice, connected into one growth system.",
-  email: "info@brandsparkx.com",
+  email: "business@brandsparkx.com",
   phone: "+971 55 996 3778",
   phoneHref: "tel:+971559963778",
   whatsappHref: "https://wa.me/971559963778",
