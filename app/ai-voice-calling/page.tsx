@@ -95,7 +95,11 @@ export default function VoicePage() {
               Book an AI Voice Demo <Icon name="i-arrow" />
             </Link>
           </div>
-          <div className="call" role="group" aria-label="Illustrative AI voice call">
+          <div
+            className="call orange-hover-glow"
+            role="group"
+            aria-label="Illustrative AI voice call"
+          >
             <div className="call-top">
               <span className="live">
                 <i />

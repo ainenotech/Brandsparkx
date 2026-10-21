@@ -14,7 +14,7 @@ export function FinalCta({ title, text, children, compactTop }: FinalCtaProps) {
   return (
     <div className="fcta" style={compactTop ? { paddingTop: "clamp(60px,8vw,100px)" } : undefined}>
       <div className="wrap">
-        <div className="fcta-box rv">
+        <div className="fcta-box rv orange-hover-glow">
           <div className="fgrid" aria-hidden="true" />
           <div style={{ position: "relative" }}>
             <h2>{title}</h2>

@@ -20,7 +20,7 @@ export const site = {
   tagline: "Build. Automate. Grow with AI.",
   description:
     "AI growth & automation for ambitious businesses — strategy, automation, engineering and AI voice, connected into one growth system.",
-  email: "info@brandsparkx.com",
+  email: "business@brandsparkx.com",
   phone: "+971 55 996 3778",
   phoneHref: "tel:+971559963778",
   whatsappHref: "https://wa.me/971559963778",
@@ -57,10 +57,11 @@ export const site = {
 
 export const nav = [
   { href: "/", label: "Home" },
-  { href: "/solutions", label: "Solutions" },
+  { href: "/services", label: "Services" },
   { href: "/ai-voice-calling", label: "AI Voice & Calling" },
   { href: "/ai-engineers", label: "AI Engineers" },
   { href: "/work", label: "Work" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+  { href: "/solutions", label: "Solutions" },
+  { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact Us" },
 ] as const;
