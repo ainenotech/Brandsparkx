@@ -5,17 +5,15 @@ import { Icon } from "@/components/Icon";
 import { flowStages } from "@/content/flow";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
-const AUTO_ADVANCE_MS = 2600;
+const AUTO_ADVANCE_MS = 2500;
 const last = flowStages.length - 1;
 
 /**
- * Customer-journey stepper. Advances on its own once scrolled into view;
- * any hover, click or key press hands control to the visitor for good.
+ * Customer-journey stepper. Advances on its own while in view and loops continuously.
  */
 export function GrowthFlow() {
   const reduce = useReducedMotion();
   const [active, setActive] = useState(0);
-  const [auto, setAuto] = useState(true);
   const [inView, setInView] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -32,18 +30,15 @@ export function GrowthFlow() {
   }, []);
 
   useEffect(() => {
-    if (!auto || !inView || reduce) return;
+    if (!inView || reduce) return;
     const timer = window.setInterval(
       () => setActive((i) => (i + 1) % flowStages.length),
       AUTO_ADVANCE_MS,
     );
     return () => window.clearInterval(timer);
-  }, [auto, inView, reduce]);
+  }, [inView, reduce]);
 
-  const select = (i: number) => {
-    setAuto(false);
-    setActive(i);
-  };
+  const select = (i: number) => setActive(i);
 
   const onKeyDown = (e: KeyboardEvent) => {
     const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
@@ -84,7 +79,6 @@ export function GrowthFlow() {
             aria-controls="flow-panel"
             tabIndex={i === active ? 0 : -1}
             onClick={() => select(i)}
-            onMouseEnter={() => select(i)}
           >
             <span className="dot">
               <Icon name={s.icon} />

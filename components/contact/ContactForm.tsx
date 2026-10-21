@@ -3,24 +3,15 @@
 import { useEffect, useRef, useState, type FocusEvent, type FormEvent } from "react";
 import { Icon } from "@/components/Icon";
 import { interests } from "@/content/interests";
+import { site } from "@/content/site";
 import {
   contactFields,
   contactRules,
   requiredFields,
-  type ContactData,
   type ContactField,
 } from "@/lib/validation";
 
-type Status = "idle" | "invalid" | "sending" | "sent";
-
-/**
- * PHASE 2: replace this with a server action that validates (lib/validation.ts),
- * checks spam protection and delivers the lead. It currently simulates sending, like the original.
- */
-async function submitContact(data: ContactData): Promise<void> {
-  void data;
-  await new Promise((resolve) => setTimeout(resolve, 1100));
-}
+type Status = "idle" | "invalid" | "ready";
 
 const messages: Record<ContactField, string> = {
   name: "Enter your name.",
@@ -35,6 +26,7 @@ export function ContactForm() {
   const touched = useRef(new Set<ContactField>());
   const [errors, setErrors] = useState<Partial<Record<ContactField, boolean>>>({});
   const [status, setStatus] = useState<Status>("idle");
+  const [draftHref, setDraftHref] = useState("");
 
   // `?interest=AI%20Sales` pre-selects that interest; the page also tells the CSS it is the contact page.
   useEffect(() => {
@@ -73,9 +65,13 @@ export function ContactForm() {
   const onInput = (e: FormEvent<HTMLFormElement>) => {
     const name = fieldName(e.target);
     if (name && errors[name]) check(name);
+    if (status === "ready") {
+      setStatus("idle");
+      setDraftHref("");
+    }
   };
 
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const results = contactFields.map((name) => [name, check(name)] as const);
@@ -87,8 +83,7 @@ export function ContactForm() {
     }
 
     const fd = new FormData(form);
-    setStatus("sending");
-    await submitContact({
+    const data = {
       name: String(fd.get("name") ?? "").trim(),
       company: String(fd.get("company") ?? "").trim(),
       email: String(fd.get("email") ?? "").trim(),
@@ -96,11 +91,25 @@ export function ContactForm() {
       website: String(fd.get("website") ?? "").trim(),
       interests: fd.getAll("interest").map(String),
       message: String(fd.get("message") ?? "").trim(),
-    });
-    form.reset();
-    touched.current.clear();
-    setErrors({});
-    setStatus("sent");
+    };
+    const body = [
+      `Name: ${data.name}`,
+      data.company && `Company: ${data.company}`,
+      `Work email: ${data.email}`,
+      data.phone && `Phone: ${data.phone}`,
+      data.website && `Website: ${data.website}`,
+      data.interests.length > 0 && `Interested in: ${data.interests.join(", ")}`,
+      "",
+      "Message:",
+      data.message,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const subject = `Project enquiry from ${data.name}`;
+    setDraftHref(
+      `mailto:${site.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+    );
+    setStatus("ready");
   };
 
   // Shared props for each validated field.
@@ -195,13 +204,14 @@ export function ContactForm() {
           </>
         )}
       </div>
-      <div className={status === "sent" ? "fstate s show" : "fstate s"} role="status">
-        {status === "sent" && (
+      <div className={status === "ready" ? "fstate s show" : "fstate s"} role="status">
+        {status === "ready" && (
           <>
-            <Icon name="i-check" />
+            <Icon name="i-mail" />
             <span>
-              <b>Conversation started.</b> This is a frontend demo, so nothing was sent. Connect the
-              form to your CRM or email service before launch.
+              <b>Email draft prepared.</b> Nothing has been sent. Open the draft and send it from
+              your email app.{" "}
+              <a href={draftHref}>Open email draft</a>
             </span>
           </>
         )}
@@ -209,18 +219,10 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className={status === "sending" ? "btn btn-red loading" : "btn btn-red"}
-        aria-busy={status === "sending"}
+        className="btn btn-red"
       >
-        {status === "sending" ? (
-          <>
-            Sending <span className="spin" />
-          </>
-        ) : (
-          <>
-            Start a Conversation <Icon name="i-arrow" />
-          </>
-        )}
+        {status === "ready" ? "Update email draft" : "Prepare email draft"}{" "}
+        <Icon name="i-arrow" />
       </button>
     </form>
   );

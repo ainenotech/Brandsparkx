@@ -199,7 +199,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="bento">
-            <Link href="/ai-voice-calling" className="sol dark feat rv">
+            <Link href="/ai-voice-calling" className="sol dark feat rv orange-hover-glow">
               <span className="ic">
                 <Icon name="i-voice" />
               </span>
@@ -261,7 +261,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="dark-sec" id="growth-system">
+      <section className="dark-sec orange-hover-glow" id="growth-system">
         <div className="wrap">
           <div className="sec-head rv">
             <div>

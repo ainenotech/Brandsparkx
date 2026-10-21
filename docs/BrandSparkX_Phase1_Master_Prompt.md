@@ -176,7 +176,7 @@ public/brand/
 
 ### Contact `/contact`
 
-- [ ] Primary contact card (Krishna Patil, Krishna@brandsparkx.com, +971 55 996 3778), general email info@brandsparkx.com, both offices, `tel:` and `mailto:` links
+- [ ] Primary contact card (Krishna Patil, Krishna@brandsparkx.com, +971 55 996 3778), general email business@brandsparkx.com, both offices, `tel:` and `mailto:` links
 - [ ] Fields: name\*, company, work email\*, WhatsApp/phone, website, 8 interest checkboxes, message\*
 - [ ] Identical rules and error messages, implemented as pure functions in `lib/validation.ts`:
   - name: trimmed length > 1
