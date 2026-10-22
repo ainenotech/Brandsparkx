@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Manrope } from "next/font/google";
+import { Inter, Italianno, JetBrains_Mono, Manrope } from "next/font/google";
 import Script from "next/script";
 import { LazyFloatingControls } from "@/components/chat/LazyFloatingControls";
 import { IconSprite } from "@/components/IconSprite";
@@ -31,6 +31,12 @@ const mono = JetBrains_Mono({
   display: "swap",
   variable: "--font-jetbrains-mono",
 });
+const script = Italianno({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-italianno",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -54,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${manrope.variable} ${inter.variable} ${mono.variable}`}
+      className={`${manrope.variable} ${inter.variable} ${mono.variable} ${script.variable}`}
       suppressHydrationWarning
     >
       <head>

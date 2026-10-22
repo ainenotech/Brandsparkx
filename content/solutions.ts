@@ -22,6 +22,31 @@ export type Solution = {
 
 export const solutions: Solution[] = [
   {
+    slug: "ai-voice-calling",
+    key: "voice",
+    icon: "i-voice",
+    title: "AI Voice & Calling",
+    shortTitle: "AI Voice & Calling",
+    headline: "Give your business a voice.",
+    description:
+      "Deploy AI voice agents that communicate with customers at scale — from lead qualification and outbound calling to inbound enquiries, appointment booking and follow-ups.",
+    capabilities: [
+      "AI voice agents",
+      "AI calling",
+      "Inbound calls",
+      "Outbound calls",
+      "Lead qualification",
+      "Appointment booking",
+      "Automated follow-up",
+    ],
+    linkLabel: "Explore AI Voice",
+    page: "/ai-voice-calling",
+    interest: "AI Voice & Calling",
+    seoTitle: "AI Voice Agents & AI Calling Solutions | BrandSparkX Dubai",
+    seoDescription:
+      "AI voice agents in Dubai that answer inbound calls, run outbound calling, qualify leads and book appointments 24/7 — without growing your headcount.",
+  },
+  {
     slug: "ai-growth",
     key: "growth",
     icon: "i-growth",
@@ -158,31 +183,6 @@ export const solutions: Solution[] = [
     seoTitle: "AI Engineers on Demand | AI Development Talent | BrandSparkX",
     seoDescription:
       "Hire AI engineers on demand by project, week or month. Agentic AI, full-stack, backend, cloud and application support with one point of contact.",
-  },
-  {
-    slug: "ai-voice-calling",
-    key: "voice",
-    icon: "i-voice",
-    title: "AI Voice & Calling",
-    shortTitle: "AI Voice & Calling",
-    headline: "Give your business a voice.",
-    description:
-      "Deploy AI voice agents that communicate with customers at scale — from lead qualification and outbound calling to inbound enquiries, appointment booking and follow-ups.",
-    capabilities: [
-      "AI voice agents",
-      "AI calling",
-      "Inbound calls",
-      "Outbound calls",
-      "Lead qualification",
-      "Appointment booking",
-      "Automated follow-up",
-    ],
-    linkLabel: "Explore AI Voice",
-    page: "/ai-voice-calling",
-    interest: "AI Voice & Calling",
-    seoTitle: "AI Voice Agents & AI Calling Solutions | BrandSparkX Dubai",
-    seoDescription:
-      "AI voice agents in Dubai that answer inbound calls, run outbound calling, qualify leads and book appointments 24/7 — without growing your headcount.",
   },
 ];
 

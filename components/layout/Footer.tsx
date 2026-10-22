@@ -1,19 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
-import { ScrollTopButton } from "@/components/layout/ScrollTopButton";
 import { site } from "@/content/site";
 import { solutionHref, solutions } from "@/content/solutions";
 
-// Footer order matches the original site.
+// AI Voice & Calling leads as the main offering; the rest follow the original site order.
 const footerSolutions = [
+  "ai-voice-calling",
   "ai-growth",
   "ai-content",
   "ai-marketing",
   "ai-sales",
   "business-automation",
   "ai-engineers",
-  "ai-voice-calling",
 ]
   .map((slug) => solutions.find((s) => s.slug === slug)!)
   .map((s) => ({
@@ -134,6 +133,23 @@ export function Footer() {
               </span>
             </a>
           </div>
+          <h2 className="fh fh-sub">Careers</h2>
+          <div className="cl">
+            <a href={site.careers.phoneHref}>
+              <Icon name="i-phone" />
+              <span>
+                <small>Phone</small>
+                {site.careers.phone}
+              </span>
+            </a>
+            <a href={`mailto:${site.careers.email}`}>
+              <Icon name="i-mail" />
+              <span>
+                <small>Email</small>
+                {site.careers.email}
+              </span>
+            </a>
+          </div>
         </div>
 
         <div>
@@ -154,7 +170,6 @@ export function Footer() {
           <Link href="/privacy">Privacy Policy</Link>
           <Link href="/terms">Terms &amp; Conditions</Link>
         </nav>
-        <ScrollTopButton className="ftop" />
       </div>
     </footer>
   );

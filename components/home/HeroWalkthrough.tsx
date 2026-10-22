@@ -67,7 +67,7 @@ export function HeroWalkthrough() {
           <i />
           <i />
         </span>
-        <span>brandsparkx · ai operations</span>
+        <span>brandsparkx · we make ai simple</span>
         <span className="rec">
           <i />
           LIVE

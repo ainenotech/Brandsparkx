@@ -24,6 +24,12 @@ export const site = {
   phone: "+971 55 996 3778",
   phoneHref: "tel:+971559963778",
   whatsappHref: "https://wa.me/971559963778",
+  /** Careers contact shown in the footer. Placeholder values — replace before launch. */
+  careers: {
+    phone: "+971 50 000 0000",
+    phoneHref: "tel:+971500000000",
+    email: "careers@brandsparkx.com",
+  },
   primaryContact: {
     name: "Krishna Patil",
     email: "Krishna@brandsparkx.com",
@@ -56,11 +62,9 @@ export const site = {
 } as const;
 
 export const nav = [
-  { href: "/", label: "Home" },
-  { href: "/services", label: "Services" },
   { href: "/ai-voice-calling", label: "AI Voice & Calling" },
   { href: "/ai-engineers", label: "AI Engineers" },
-  { href: "/work", label: "Work" },
+  { href: "/work", label: "Case Studies" },
   { href: "/solutions", label: "Solutions" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact Us" },

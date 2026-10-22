@@ -14,7 +14,10 @@ export function TeamGrid({ members }: { members: TeamMember[] }) {
         >
           <div className="portrait">
             {m.photo ? (
-              <Image src={m.photo} alt={m.name} fill sizes="(max-width: 800px) 100vw, 33vw" />
+              // Photos come in mixed shapes (circular cut-outs and full shots), so all are shown as a round avatar.
+              <span className="avatar">
+                <Image src={m.photo} alt={m.name} fill sizes="(max-width: 560px) 70vw, 240px" />
+              </span>
             ) : (
               <>
                 <span className="ph">{m.published ? "Photo to be added" : "Placeholder"}</span>

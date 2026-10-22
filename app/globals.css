@@ -16,6 +16,10 @@
   --display: var(--font-manrope), system-ui, -apple-system, "Segoe UI", sans-serif;
   --body: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
+  --script: var(--font-italianno), "Brush Script MT", cursive;
+  --section-y: clamp(56px, 6.5vw, 96px);
+  --section-y-sm: clamp(40px, 5vw, 64px);
+  --head-gap: clamp(28px, 3.5vw, 44px);
   --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
   --wrap: 1200px;
   box-sizing: border-box;
@@ -113,25 +117,35 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font: 500 0.8rem/1 var(--mono);
+  font: 400 clamp(1.7rem, 2.6vw, 2.3rem)/1 var(--script);
   color: var(--red);
-  margin-bottom: 22px;
+  margin-bottom: 14px;
 }
 .kicker::before {
   content: "";
+  flex: none;
+  align-self: center;
   width: 22px;
   height: 1.5px;
   background: var(--red);
+  /* Script glyphs sit low in their line box; nudge the rule up to the text's visual middle. */
+  transform: translateY(-0.08em);
 }
 section {
-  padding: clamp(80px, 10vw, 140px) 0;
+  padding: var(--section-y) 0;
+}
+/* Two plain (same-background) sections in a row: trim the doubled gap between them.
+   :where() keeps this at `section + section` specificity, so class/inline padding still wins. */
+section:where(:not([style*="background"], .dark-sec))
+  + section:where(:not([style*="background"], .dark-sec)) {
+  padding-top: var(--section-y-sm);
 }
 .sec-head {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
   align-items: end;
-  margin-bottom: 64px;
+  margin-bottom: var(--head-gap);
 }
 .sec-head p {
   justify-self: end;
@@ -438,11 +452,99 @@ section {
 .hero {
   display: flex;
   align-items: center;
-  min-height: calc(100vh - 79px);
-  min-height: calc(100svh - 79px);
-  padding: clamp(40px, 6vw, 80px) 0 clamp(80px, 10vw, 140px);
+  min-height: min(calc(100vh - 79px), 820px);
+  min-height: min(calc(100svh - 79px), 820px);
+  padding: clamp(32px, 4.5vw, 56px) 0 clamp(48px, 6vw, 80px);
   position: relative;
   overflow: visible;
+}
+/* Tilted red ribbon laid across the bottom edge of the home hero.
+   The band's height comes from its padding; --ribbon-h mirrors it so the hero's margin
+   keeps the overhang off the next section (≈ 110vw × sin 3° / 2 + band height / 2,
+   plus the 28px downward shift below and a 24px gap). */
+.hero:has(> .hero-ribbon) {
+  --ribbon-h: 90px;
+  margin-bottom: calc(2.9vw + var(--ribbon-h) / 2 + 52px);
+}
+.hero-ribbon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Sits 28px below centre so the high right end clears the hero visual at laptop widths. */
+  transform: translateY(calc(50% + 28px));
+  overflow-x: clip;
+  z-index: 3;
+  pointer-events: none;
+}
+.hero-ribbon-band {
+  width: 110vw;
+  margin-left: calc(50% - 55vw);
+  padding: 28px 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--red);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transform: rotate(-3deg);
+  pointer-events: auto;
+}
+.hero-ribbon-track {
+  display: flex;
+  width: max-content;
+  animation: ribbonScroll 340s linear infinite;
+}
+.hero-ribbon-band:hover .hero-ribbon-track {
+  animation-play-state: paused;
+}
+.hero-ribbon-set {
+  display: flex;
+}
+.hero-ribbon-item {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  padding-right: 36px;
+  color: #fff;
+  font: 800 1.75rem/1.2 var(--display);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.hero-ribbon-star {
+  width: 1.4rem;
+  height: 1.4rem;
+  fill: #111;
+  flex: none;
+}
+@keyframes ribbonScroll {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@media (max-width: 600px) {
+  .hero:has(> .hero-ribbon) {
+    --ribbon-h: 64px;
+  }
+  .hero-ribbon-band {
+    padding: 20px 0;
+  }
+  .hero-ribbon-item {
+    font-size: 1.2rem;
+    gap: 24px;
+    padding-right: 24px;
+  }
+  .hero-ribbon-star {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-ribbon-track {
+    animation: none;
+  }
 }
 .hero-grid {
   display: grid;
@@ -640,49 +742,11 @@ section {
   }
 }
 
-/* trust strip */
-.strip {
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  padding: 26px 0;
-}
-.strip .wrap {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-.strip span {
-  font-size: 0.9rem;
-  color: var(--text2);
-}
-.strip ul {
-  list-style: none;
-  display: flex;
-  gap: 34px;
-  flex-wrap: wrap;
-}
-.strip li {
-  font: 600 0.95rem var(--display);
-  color: var(--ink);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.strip li::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  background: var(--red);
-  transform: rotate(45deg);
-}
-
 /* intro statement */
 .statement {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
-  gap: clamp(30px, 6vw, 90px);
+  gap: clamp(24px, 4vw, 56px);
 }
 .statement .big {
   font: 600 clamp(1.4rem, 2.3vw, 1.9rem)/1.35 var(--display);
@@ -1180,7 +1244,7 @@ section {
 .why {
   display: grid;
   grid-template-columns: 0.8fr 1.2fr;
-  gap: clamp(30px, 6vw, 90px);
+  gap: clamp(24px, 4vw, 56px);
 }
 .why-list {
   border-top: 1px solid var(--ink);
@@ -1229,7 +1293,7 @@ section {
 /* team */
 .team {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
 .member {
@@ -1300,17 +1364,22 @@ section {
   gap: 8px;
   margin-top: 14px;
 }
-.member.lead {
-  display: flex;
-  flex-direction: column;
+.portrait .avatar {
+  position: relative;
+  width: 72%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(16, 16, 20, 0.1);
+  transition: transform 0.6s var(--ease);
 }
-.member.lead .portrait {
-  aspect-ratio: auto;
-  flex: 1;
-  min-height: 420px;
+.portrait .avatar img {
+  object-fit: cover;
+  object-position: center 20%;
 }
-.member.lead {
-  grid-row: span 2;
+.member:hover .avatar {
+  transform: scale(1.04);
 }
 .member.ph-card .portrait {
   border: 1.5px dashed #d4d4d9;
@@ -1323,22 +1392,10 @@ section {
   .team {
     grid-template-columns: 1fr 1fr;
   }
-  .member.lead {
-    grid-row: auto;
-    grid-column: span 2;
-  }
-  .member.lead .portrait {
-    aspect-ratio: 16/11;
-    min-height: 0;
-    flex: none;
-  }
 }
 @media (max-width: 560px) {
   .team {
     grid-template-columns: 1fr;
-  }
-  .member.lead {
-    grid-column: auto;
   }
 }
 .soc a {
@@ -1360,50 +1417,115 @@ section {
   height: 15px;
 }
 
-/* clients */
-.logos {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  border-top: 1px solid var(--line);
-  border-left: 1px solid var(--line);
+/* clients: compact "trusted by" band with an auto-scrolling logo strip */
+.trust {
+  padding: 0 0 clamp(56px, 7vw, 88px);
 }
-.lg {
-  aspect-ratio: 3/2;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+.trust-grid {
   display: grid;
-  place-items: center;
+  grid-template-columns: minmax(240px, 340px) 1fr;
+  gap: clamp(28px, 4vw, 56px);
+  align-items: center;
+}
+.trust-head h2 {
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  margin-top: 14px;
+}
+.trust-head p {
+  margin-top: 12px;
+  color: var(--text2);
+  font-size: 0.95rem;
+}
+.trust-marquee {
   position: relative;
-  transition: background 0.3s;
-}
-.lg:hover {
+  overflow: hidden;
+  padding: 26px 0;
+  border-radius: 22px;
   background: var(--soft);
 }
-.lg .slot {
-  width: 60%;
-  height: 26%;
-  border-radius: 6px;
-  border: 1.5px dashed #d2d2d8;
+.trust-marquee::before,
+.trust-marquee::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 72px;
+  z-index: 1;
+  pointer-events: none;
+}
+.trust-marquee::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--soft), transparent);
+}
+.trust-marquee::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--soft), transparent);
+}
+.trust-track {
+  display: flex;
+  width: max-content;
+  animation: trustScroll 64s linear infinite;
+}
+.trust-marquee:hover .trust-track {
+  animation-play-state: paused;
+}
+.trust-set {
+  display: flex;
+  gap: 16px;
+  padding-right: 16px;
+}
+.trust-logo {
+  width: 172px;
+  height: 78px;
   display: grid;
   place-items: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  transition:
+    border-color 0.3s,
+    transform 0.3s;
+}
+.trust-logo:hover {
+  border-color: var(--red);
+  transform: translateY(-2px);
+}
+.trust-logo img {
+  width: auto;
+  height: 48px;
+  max-width: 76%;
+  object-fit: contain;
+}
+.trust-logo .slot {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1.5px dashed #d2d2d8;
   font: 500 0.68rem var(--mono);
   color: #9a9aa2;
   transition:
     border-color 0.3s,
     color 0.3s;
 }
-.lg:hover .slot {
+.trust-logo:hover .slot {
   border-color: var(--red);
   color: var(--red);
 }
-@media (max-width: 860px) {
-  .logos {
-    grid-template-columns: repeat(3, 1fr);
+@keyframes trustScroll {
+  to {
+    transform: translateX(-50%);
   }
 }
-@media (max-width: 480px) {
-  .logos {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 860px) {
+  .trust-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trust-track {
+    animation: none;
+  }
+  .trust-marquee {
+    overflow-x: auto;
   }
 }
 .note {
@@ -1508,7 +1630,7 @@ section {
 .testi {
   display: grid;
   grid-template-columns: 0.8fr 1.2fr;
-  gap: clamp(30px, 6vw, 90px);
+  gap: clamp(24px, 4vw, 56px);
   align-items: center;
 }
 .tcard {
@@ -1609,13 +1731,13 @@ section {
 
 /* final CTA */
 .fcta {
-  padding: 0 0 clamp(80px, 10vw, 130px);
+  padding: 0 0 clamp(56px, 7vw, 88px);
 }
 .fcta-box {
   background: var(--ink);
   color: #fff;
   border-radius: 28px;
-  padding: clamp(40px, 7vw, 90px);
+  padding: clamp(32px, 5vw, 64px);
   position: relative;
   overflow: hidden;
   display: grid;
@@ -1662,7 +1784,7 @@ section {
 
 /* inner page hero */
 .phero {
-  padding: clamp(60px, 8vw, 110px) 0 clamp(50px, 6vw, 80px);
+  padding: clamp(44px, 5.5vw, 76px) 0 clamp(36px, 4.5vw, 56px);
   border-bottom: 1px solid var(--line);
   position: relative;
   overflow: hidden;
@@ -2458,7 +2580,10 @@ fieldset.fld {
   display: grid;
   grid-template-columns: 1.3fr 1.2fr 0.9fr 0.8fr;
   gap: clamp(28px, 4vw, 56px);
-  padding: clamp(70px, 8vw, 100px) 0 clamp(100px, 12vw, 160px);
+  /* Vertical only, so .wrap keeps its side gutters. Bottom padding is the room for the
+     BRANDSPARKX watermark (same size as its font-size). */
+  padding-top: clamp(48px, 6vw, 72px);
+  padding-bottom: calc(clamp(64px, 11vw, 160px) + 12px);
   position: relative;
   z-index: 3;
   pointer-events: none;
@@ -2565,9 +2690,13 @@ fieldset.fld {
   color: #7e7e88;
   font: 500 0.72rem var(--mono);
 }
+.ftr .fh-sub {
+  margin-top: 24px;
+}
 .ftr-bot {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 24px 0;
+  padding-top: 24px;
+  padding-bottom: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2589,24 +2718,6 @@ fieldset.fld {
 }
 .ftr-bot nav a:hover {
   color: #fff;
-}
-.ftop {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  display: grid;
-  place-items: center;
-  color: #fff;
-  transition: all 0.25s;
-}
-.ftop:hover {
-  background: var(--red);
-  border-color: var(--red);
-}
-.ftop svg {
-  width: 16px;
-  height: 16px;
 }
 @media (max-width: 980px) {
   .ftr-top {
@@ -3719,7 +3830,7 @@ fieldset.fld {
 }
 @media (min-width: 901px) and (max-height: 1000px) {
   .hero {
-    min-height: calc(100svh - 79px);
+    min-height: min(calc(100svh - 79px), 820px);
     padding: 12px 0;
   }
   .hero h1 {
@@ -3954,14 +4065,14 @@ fieldset.fld {
   white-space: pre;
   overflow: hidden;
 }
-.cl {
+.ed-code .cl {
   display: block;
   padding: 0 16px 0 0;
   counter-increment: ln;
   clip-path: inset(0 100% 0 0);
   animation: typeIn 0.5s steps(24) forwards;
 }
-.cl::before {
+.ed-code .cl::before {
   content: counter(ln);
   display: inline-block;
   width: 36px;
@@ -4775,7 +4886,7 @@ html[data-brand-intro-active] .brand-intro__wordmark {
   left: 0;
 }
 .contact-main {
-  padding: 12px 0 clamp(76px, 10vw, 130px);
+  padding: 12px 0 clamp(52px, 7vw, 88px);
 }
 .contact-layout {
   display: grid;

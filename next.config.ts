@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/solutions/ai-voice-calling", destination: "/ai-voice-calling", permanent: true },
       { source: "/solutions/ai-engineers", destination: "/ai-engineers", permanent: true },
+      // The Services page was merged into /solutions.
+      { source: "/services", destination: "/solutions", permanent: true },
     ];
   },
 };

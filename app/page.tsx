@@ -5,6 +5,7 @@ import { FinalCta } from "@/components/FinalCta";
 import { Process } from "@/components/Process";
 import { CaseCards } from "@/components/home/CaseCards";
 import { GrowthFlow } from "@/components/home/GrowthFlow";
+import { HeroRibbon } from "@/components/home/HeroRibbon";
 import { HeroWalkthrough } from "@/components/home/HeroWalkthrough";
 import { TeamGrid } from "@/components/home/TeamGrid";
 import { Testimonials } from "@/components/home/Testimonials";
@@ -138,19 +139,49 @@ export default function HomePage() {
           </div>
           <HeroWalkthrough />
         </div>
+        <HeroRibbon />
       </section>
 
-      <div className="strip">
-        <div className="wrap">
-          <span>Built for ambitious businesses looking to</span>
-          <ul>
-            <li>Grow faster</li>
-            <li>Reduce manual work</li>
-            <li>Improve sales efficiency</li>
-            <li>Add AI talent</li>
-          </ul>
-        </div>
-      </div>
+      {(clientLogos.length > 0 || showLogoSlots) && (
+        <section className="trust" id="clients">
+          <div className="wrap">
+            <div className="trust-grid">
+              <div className="trust-head rv">
+                <div className="kicker">Our clients</div>
+                <h2>Trusted by ambitious businesses.</h2>
+                <p>Building intelligent solutions for businesses ready to grow.</p>
+              </div>
+              <div className="trust-marquee rv">
+                <div className="trust-track">
+                  {/* Two identical sets so the strip loops seamlessly; the copy is hidden from screen readers. */}
+                  {[0, 1].map((copy) => (
+                    <div className="trust-set" key={copy} aria-hidden={copy === 1 || undefined}>
+                      {showLogoSlots
+                        ? Array.from({ length: 6 }, (_, i) => (
+                            <div className="trust-logo" key={i}>
+                              <div className="slot">Client logo</div>
+                            </div>
+                          ))
+                        : clientLogos.map((c) => (
+                            <div className="trust-logo" key={c.name}>
+                              <Image src={c.logo} alt={c.name} width={c.width} height={c.height} />
+                            </div>
+                          ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {showLogoSlots && (
+              <div className="note rv">
+                <Icon name="i-info" />
+                Logo slots are placeholders. Add approved client logos (monochrome SVG works best) —
+                they gain a colour transition on hover.
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       <section>
         <div className="wrap statement">
@@ -332,40 +363,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {(clientLogos.length > 0 || showLogoSlots) && (
-        <section style={{ paddingTop: 0 }} id="clients">
-          <div className="wrap">
-            <div className="sec-head rv">
-              <div>
-                <div className="kicker">Our clients</div>
-                <h2>Trusted by ambitious businesses.</h2>
-              </div>
-              <p className="lede">Building intelligent solutions for businesses ready to grow.</p>
-            </div>
-            <div className="logos rv">
-              {showLogoSlots
-                ? Array.from({ length: 6 }, (_, i) => (
-                    <div className="lg" key={i}>
-                      <div className="slot">Client logo</div>
-                    </div>
-                  ))
-                : clientLogos.map((c) => (
-                    <div className="lg" key={c.name}>
-                      <Image src={c.logo} alt={c.name} width={140} height={48} />
-                    </div>
-                  ))}
-            </div>
-            {showLogoSlots && (
-              <div className="note rv">
-                <Icon name="i-info" />
-                Logo slots are placeholders. Add approved client logos (monochrome SVG works best) —
-                they gain a colour transition on hover.
-              </div>
-            )}
-          </div>
-        </section>
-      )}
 
       {caseItems.length > 0 && (
         <section style={{ background: "var(--soft)" }} id="stories">
