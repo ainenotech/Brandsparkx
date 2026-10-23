@@ -5,7 +5,8 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { FinalCta } from "@/components/FinalCta";
 import { Icon } from "@/components/Icon";
 import { JsonLd } from "@/components/JsonLd";
-import { Process } from "@/components/Process";
+import { FlowSection } from "@/components/flow/FlowSection";
+import { LinearFlow } from "@/components/flow/LinearFlow";
 import { contactHref, solutionHref, solutions } from "@/content/solutions";
 import { pageMetadata, serviceJsonLd } from "@/lib/seo";
 
@@ -65,6 +66,8 @@ export default async function SolutionPage({ params }: Props) {
         </div>
       </div>
 
+      <FlowSection id={s.slug} />
+
       <section>
         <div className="wrap">
           <div className="sec-head rv">
@@ -76,7 +79,7 @@ export default async function SolutionPage({ params }: Props) {
               Five stages, one direction. Start small, prove value, then scale what works.
             </p>
           </div>
-          <Process />
+          <LinearFlow />
         </div>
       </section>
 

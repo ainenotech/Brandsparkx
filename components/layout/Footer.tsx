@@ -149,6 +149,10 @@ export function Footer() {
                 {site.careers.email}
               </span>
             </a>
+            <Link href="/careers">
+              <Icon name="i-arrow" />
+              <span>View careers</span>
+            </Link>
           </div>
         </div>
 

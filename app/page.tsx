@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { FinalCta } from "@/components/FinalCta";
-import { Process } from "@/components/Process";
+import { FlowSection } from "@/components/flow/FlowSection";
+import { LinearFlow } from "@/components/flow/LinearFlow";
 import { CaseCards } from "@/components/home/CaseCards";
-import { GrowthFlow } from "@/components/home/GrowthFlow";
 import { HeroRibbon } from "@/components/home/HeroRibbon";
 import { HeroWalkthrough } from "@/components/home/HeroWalkthrough";
 import { TeamGrid } from "@/components/home/TeamGrid";
@@ -218,6 +218,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <FlowSection id="home" />
+
       <section style={{ paddingTop: 0 }}>
         <div className="wrap">
           <div className="sec-head rv">
@@ -292,22 +294,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="dark-sec orange-hover-glow" id="growth-system">
-        <div className="wrap">
-          <div className="sec-head rv">
-            <div>
-              <div className="kicker">The AI growth system</div>
-              <h2>One connected AI ecosystem.</h2>
-            </div>
-            <p className="lede">
-              AI can support every stage of the customer journey. Select a stage to see where
-              BrandSparkX connects in.
-            </p>
-          </div>
-          <GrowthFlow />
-        </div>
-      </section>
-
       <section id="how">
         <div className="wrap">
           <div className="sec-head rv">
@@ -319,7 +305,7 @@ export default function HomePage() {
               Five stages, one direction. Start small, prove value, then scale what works.
             </p>
           </div>
-          <Process />
+          <LinearFlow />
         </div>
       </section>
 

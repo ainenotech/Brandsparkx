@@ -69,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <style>{".rv{opacity:1!important;transform:none!important}"}</style>
         </noscript>
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <Script id="brand-intro-gate" strategy="beforeInteractive">
           {`const root = document.documentElement;
 root.dataset.brandIntroPending = "true";
