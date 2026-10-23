@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FocusEvent, type FormEvent } from "react";
 import { Icon } from "@/components/Icon";
 import { interests } from "@/content/interests";
+import { postToScript } from "@/lib/postToScript";
 import {
   contactFields,
   contactRules,
@@ -11,8 +12,6 @@ import {
 } from "@/lib/validation";
 
 type Status = "idle" | "invalid" | "sending" | "sent" | "failed";
-
-const scriptUrl = process.env.NEXT_PUBLIC_CONTACT_SCRIPT_URL;
 
 const messages: Record<ContactField, string> = {
   name: "Enter your name.",
@@ -97,12 +96,7 @@ export function ContactForm() {
     sending.current = true;
     setStatus("sending");
     try {
-      if (!scriptUrl) throw new Error("NEXT_PUBLIC_CONTACT_SCRIPT_URL is not set");
-      // No Content-Type header: it keeps this a simple text/plain request, so the
-      // browser skips the CORS preflight that Apps Script cannot answer.
-      const res = await fetch(scriptUrl, { method: "POST", body: JSON.stringify(payload) });
-      const result = (await res.json()) as { ok?: boolean; error?: string };
-      if (!result.ok) throw new Error(result.error || "Submission rejected");
+      await postToScript(payload);
       form.reset();
       touched.current.clear();
       setErrors({});

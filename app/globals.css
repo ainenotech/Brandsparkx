@@ -2319,8 +2319,185 @@ section:where(:not([style*="background"], .dark-sec))
 .career-steps h3 {
   display: inline;
 }
+/* Application form: a card in the same style as the contact form. */
 .career-apply .form {
   margin-top: 28px;
+  gap: 22px 18px;
+  padding: clamp(22px, 4vw, 44px);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: #fff;
+  box-shadow:
+    0 24px 70px rgba(29, 29, 38, 0.065),
+    0 2px 8px rgba(29, 29, 38, 0.025);
+}
+.career-apply .fld label {
+  color: #29292f;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.career-apply .fld input,
+.career-apply .fld textarea,
+.career-apply .fld select {
+  padding: 14px 15px;
+  border: 1px solid rgba(16, 16, 20, 0.12);
+  border-radius: 12px;
+  background-color: #fafafb;
+  font-size: 0.94rem;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+.career-apply .fld select {
+  appearance: none;
+  padding-right: 44px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2362626b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 18px;
+  cursor: pointer;
+}
+.career-apply .fld select:has(option[value=""]:checked) {
+  color: #94949d;
+}
+.career-apply .fld input:hover,
+.career-apply .fld textarea:hover,
+.career-apply .fld select:hover {
+  border-color: rgba(16, 16, 20, 0.24);
+}
+.career-apply .fld input:focus,
+.career-apply .fld textarea:focus,
+.career-apply .fld select:focus {
+  border-color: var(--red);
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(216, 50, 50, 0.09);
+}
+.career-apply .fld input::placeholder,
+.career-apply .fld textarea::placeholder {
+  color: #94949d;
+}
+.career-apply .fld.err input,
+.career-apply .fld.err textarea,
+.career-apply .fld.err select {
+  border-color: var(--red);
+  box-shadow: 0 0 0 4px rgba(216, 50, 50, 0.08);
+}
+/* CV upload: the real file input covers the whole box, so click and drag-and-drop both work. */
+.cv-drop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border: 1.5px dashed rgba(16, 16, 20, 0.18);
+  border-radius: 16px;
+  background: #fafafb;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.cv-drop:hover,
+.cv-drop.is-over {
+  border-color: var(--red);
+  background: #fff7f7;
+}
+.cv-drop:focus-within {
+  border-color: var(--red);
+  box-shadow: 0 0 0 4px rgba(216, 50, 50, 0.09);
+}
+.cv-drop.has-file {
+  border-style: solid;
+  border-color: rgba(16, 16, 20, 0.12);
+  background: #fff;
+}
+.fld.err .cv-drop {
+  border-color: var(--red);
+  background: #fff7f7;
+}
+.career-apply .cv-drop input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.cv-drop__icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--red);
+  background: rgba(216, 50, 50, 0.08);
+}
+.cv-drop__icon svg {
+  width: 20px;
+  height: 20px;
+}
+.cv-drop__text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.cv-drop__text strong {
+  font-size: 0.94rem;
+  font-weight: 600;
+}
+/* Long file names cut off with an ellipsis instead of wrapping. */
+.cv-drop.has-file .cv-drop__text strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cv-drop__text strong u {
+  color: var(--red);
+  text-underline-offset: 3px;
+}
+.cv-drop__text small {
+  color: var(--text2);
+  font-size: 0.82rem;
+}
+.cv-drop__remove {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--text2);
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease;
+}
+.cv-drop__remove:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+.cv-drop__remove svg {
+  width: 16px;
+  height: 16px;
+}
+@media (max-width: 600px) {
+  .career-apply .form {
+    grid-template-columns: 1fr;
+  }
+  .career-apply .form .btn {
+    justify-self: stretch;
+    justify-content: center;
+  }
 }
 .career-note {
   margin-top: 22px;
@@ -3092,8 +3269,8 @@ fieldset.fld {
 }
 .ftr-top {
   display: grid;
-  grid-template-columns: 1.3fr 1.2fr 0.9fr 0.8fr;
-  gap: clamp(28px, 4vw, 56px);
+  grid-template-columns: 1.35fr 1fr 0.9fr 0.8fr;
+  gap: clamp(28px, 3vw, 40px) clamp(28px, 4vw, 56px);
   /* Vertical only, so .wrap keeps its side gutters. Bottom padding is the room for the
      BRANDSPARKX watermark (same size as its font-size). */
   padding-top: clamp(48px, 6vw, 72px);
@@ -3204,8 +3381,19 @@ fieldset.fld {
   color: #7e7e88;
   font: 500 0.72rem var(--mono);
 }
-.ftr .fh-sub {
-  margin-top: 24px;
+/* Offices run as one row across the bottom of the footer. */
+.ftr-locs {
+  grid-column: 1 / -1;
+  padding-top: clamp(24px, 2.5vw, 32px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ftr-locs__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(20px, 3vw, 40px);
+}
+.ftr-locs .loc {
+  margin-bottom: 0;
 }
 .ftr-bot {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -3237,9 +3425,15 @@ fieldset.fld {
   .ftr-top {
     grid-template-columns: 1fr 1fr;
   }
+  .ftr-locs__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 @media (max-width: 600px) {
   .ftr-top {
+    grid-template-columns: 1fr;
+  }
+  .ftr-locs__grid {
     grid-template-columns: 1fr;
   }
   .ftr-bot {

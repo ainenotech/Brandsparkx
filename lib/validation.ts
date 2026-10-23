@@ -61,14 +61,19 @@ export const careerRules: Record<CareerField, (value: string) => boolean> = {
   message: () => true,
 };
 
-/** Optional CV upload. PDF only, up to 5 MB. */
+/** Required CV upload. PDF, DOC or DOCX, up to 5 MB. */
 export const maxCvBytes = 5 * 1024 * 1024;
 
-const cvMimeTypes = new Set(["application/pdf"]);
+export const cvMimeTypes = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+const cvExtensions = [".pdf", ".doc", ".docx"];
 
 export function isCareerCv(file: File | null) {
-  if (!file) return true;
-  const extensionOk = file.name.toLowerCase().endsWith(".pdf");
+  if (!file) return false;
+  const extensionOk = cvExtensions.some((ext) => file.name.toLowerCase().endsWith(ext));
   const typeOk = !file.type || cvMimeTypes.has(file.type);
   return extensionOk && typeOk && file.size > 0 && file.size <= maxCvBytes;
 }

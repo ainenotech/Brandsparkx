@@ -3,16 +3,17 @@
 import { useRef, useState, type FocusEvent, type FormEvent } from "react";
 import { Icon } from "@/components/Icon";
 import { careerLocations } from "@/content/careers";
-import { site } from "@/content/site";
+import { postToScript } from "@/lib/postToScript";
 import {
   careerFields,
   careerRequiredFields,
   careerRules,
+  cvMimeTypes,
   isCareerCv,
   type CareerField,
 } from "@/lib/validation";
 
-type Status = "idle" | "invalid" | "ready";
+type Status = "idle" | "invalid" | "sending" | "sent" | "failed";
 
 const messages: Record<Exclude<CareerField, "experience" | "message">, string> = {
   name: "Enter your name.",
@@ -23,7 +24,22 @@ const messages: Record<Exclude<CareerField, "experience" | "message">, string> =
   portfolio: "Enter a full address starting with http:// or https://.",
 };
 
-const cvMessage = "Upload a PDF file up to 5 MB.";
+const cvMessage = "Upload your CV as a PDF, DOC or DOCX file up to 5 MB.";
+const cvAccept = [".pdf", ".doc", ".docx", ...cvMimeTypes].join(",");
+const failMessage =
+  "Something went wrong. Please try again or email your CV to prashanth@brandsparkx.com.";
+
+// Show the script's own message when it is about the CV (type, size or missing file).
+const isCvError = (message: string) => /\b(cv|resume|file)\b/i.test(message);
+
+function readAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
 
 export function CareersForm() {
   const formRef = useRef<HTMLFormElement>(null);
@@ -32,8 +48,11 @@ export function CareersForm() {
   const [errors, setErrors] = useState<Partial<Record<CareerField, boolean>>>({});
   const [cvError, setCvError] = useState(false);
   const [cvName, setCvName] = useState("");
+  const [cvOver, setCvOver] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
-  const [draftHref, setDraftHref] = useState("");
+  const [error, setError] = useState(failMessage);
+  // A ref, not state, so a second click before React re-renders is still ignored.
+  const sending = useRef(false);
 
   const selectedCv = () => cvRef.current?.files?.[0] ?? null;
 
@@ -69,65 +88,69 @@ export function CareersForm() {
   const onEdit = (event: FormEvent<HTMLFormElement>) => {
     const name = fieldName(event.target);
     if (name && errors[name]) check(name);
-    if (status === "ready") {
-      setStatus("idle");
-      setDraftHref("");
-    }
+    if (status === "sent") setStatus("idle");
   };
 
   const onCv = () => {
     setCvName(selectedCv()?.name ?? "");
     if (cvError) checkCv();
-    if (status === "ready") {
-      setStatus("idle");
-      setDraftHref("");
-    }
+    if (status === "sent") setStatus("idle");
   };
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const clearCv = () => {
+    if (cvRef.current) cvRef.current.value = "";
+    onCv();
+    setCvError(false);
+  };
+
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (sending.current) return;
     const form = event.currentTarget;
     const results = careerFields.map((name) => [name, check(name)] as const);
     const firstInvalid = results.find(([, ok]) => !ok)?.[0];
     const cvOk = checkCv();
-    if (firstInvalid || !cvOk) {
+    const cv = selectedCv();
+    if (firstInvalid || !cvOk || !cv) {
       setStatus("invalid");
       if (firstInvalid) (form.elements.namedItem(firstInvalid) as HTMLElement).focus();
       else cvRef.current?.focus();
       return;
     }
 
-    const data = new FormData(form);
-    const read = (name: CareerField) => String(data.get(name) ?? "").trim();
-    const application = {
-      name: read("name"),
-      email: read("email"),
-      phone: read("phone"),
-      position: read("position"),
-      experience: read("experience"),
-      location: read("location"),
-      portfolio: read("portfolio"),
-      message: read("message"),
-      cv: selectedCv()?.name ?? "",
-    };
-    const body = [
-      `Name: ${application.name}`,
-      `Email: ${application.email}`,
-      application.phone && `Phone: ${application.phone}`,
-      `Position: ${application.position}`,
-      application.experience && `Experience: ${application.experience}`,
-      application.location && `Location: ${application.location}`,
-      application.portfolio && `LinkedIn / Portfolio: ${application.portfolio}`,
-      application.cv && `CV file: ${application.cv}`,
-      application.message && ["", "Message:", application.message].join("\n"),
-    ]
-      .filter(Boolean)
-      .join("\n");
-    const subject = `Career application from ${application.name}`;
-    setDraftHref(
-      `mailto:${site.careers.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
-    );
-    setStatus("ready");
+    sending.current = true;
+    setStatus("sending");
+    try {
+      const data = new FormData(form);
+      const read = (name: string) => String(data.get(name) ?? "").trim();
+      await postToScript({
+        formType: "career",
+        name: read("name"),
+        email: read("email"),
+        phone: read("phone"),
+        position: read("position"),
+        experience: read("experience"),
+        location: read("location"),
+        linkedin: read("portfolio"),
+        message: read("message"),
+        resume: { name: cv.name, type: cv.type, data: await readAsDataUrl(cv) },
+        hp: String(data.get("hp") ?? ""),
+      });
+      form.reset();
+      if (cvRef.current) cvRef.current.value = "";
+      setCvName("");
+      setCvError(false);
+      touched.current.clear();
+      setErrors({});
+      setStatus("sent");
+    } catch (err) {
+      console.error("Career application failed", err);
+      const message = err instanceof Error ? err.message : "";
+      setError(isCvError(message) ? message : failMessage);
+      setStatus("failed");
+    } finally {
+      sending.current = false;
+    }
   };
 
   const field = (name: CareerField) => ({
@@ -197,12 +220,7 @@ export function CareersForm() {
         <label htmlFor="c-position">
           Position <i>*</i>
         </label>
-        <input
-          {...field("position")}
-          required
-          maxLength={120}
-          placeholder="Enter the position"
-        />
+        <input {...field("position")} required maxLength={120} placeholder="Enter the position" />
         {errorText("position")}
       </div>
       <div className={fieldClass("experience")}>
@@ -235,51 +253,97 @@ export function CareersForm() {
         <label htmlFor="c-message">Message</label>
         <textarea {...field("message")} maxLength={2000} placeholder="Enter your message" />
       </div>
+      {/* Honeypot: hidden from people and assistive tech; bots that fill it are dropped server-side. */}
+      <input
+        type="text"
+        name="hp"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ display: "none" }}
+      />
       <div className={["fld", "full", cvError && "err"].filter(Boolean).join(" ")}>
-        <label htmlFor="c-cv">CV</label>
-        <input
-          ref={cvRef}
-          id="c-cv"
-          name="cv"
-          type="file"
-          accept=".pdf,application/pdf"
-          aria-invalid={cvError || undefined}
-          aria-describedby={cvError ? "c-cv-msg c-cv-note" : "c-cv-note"}
-          onChange={onCv}
-        />
+        <label htmlFor="c-cv">
+          CV <i>*</i>
+        </label>
+        <div
+          className={["cv-drop", cvName && "has-file", cvOver && "is-over"]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          <input
+            ref={cvRef}
+            id="c-cv"
+            name="cv"
+            type="file"
+            accept={cvAccept}
+            aria-invalid={cvError || undefined}
+            aria-describedby={cvError ? "c-cv-msg c-cv-note" : "c-cv-note"}
+            onChange={onCv}
+            onDragEnter={() => setCvOver(true)}
+            onDragLeave={() => setCvOver(false)}
+            onDrop={() => setCvOver(false)}
+          />
+          <span className="cv-drop__icon" aria-hidden="true">
+            <Icon name={cvName ? "i-check" : "i-up"} />
+          </span>
+          <span className="cv-drop__text">
+            <strong>
+              {cvName || (
+                <>
+                  <u>Upload your CV</u> or drag it here
+                </>
+              )}
+            </strong>
+            <small id="c-cv-note">PDF, DOC or DOCX, up to 5 MB.</small>
+          </span>
+          {cvName && (
+            <button
+              type="button"
+              className="cv-drop__remove"
+              onClick={clearCv}
+              aria-label="Remove CV"
+            >
+              <Icon name="i-x" />
+            </button>
+          )}
+        </div>
         <span className="msg" id="c-cv-msg">
           {cvMessage}
         </span>
-        <span className="career-field-note" id="c-cv-note">
-          {cvName
-            ? `${cvName}. Attach this file in your email app before you send.`
-            : "PDF only, up to 5 MB. Attach it in your email app before you send."}
-        </span>
       </div>
 
-      <div className={status === "invalid" ? "fstate e show" : "fstate e"} role="alert">
+      <div
+        className={status === "invalid" || status === "failed" ? "fstate e show" : "fstate e"}
+        role="alert"
+      >
         {status === "invalid" && (
           <>
             <Icon name="i-info" />
             <span>Some fields need attention. Check the highlighted fields and try again.</span>
           </>
         )}
+        {status === "failed" && (
+          <>
+            <Icon name="i-info" />
+            <span>{error}</span>
+          </>
+        )}
       </div>
-      <div className={status === "ready" ? "fstate s show" : "fstate s"} role="status">
-        {status === "ready" && (
+      <div className={status === "sent" ? "fstate s show" : "fstate s"} role="status">
+        {status === "sent" && (
           <>
             <Icon name="i-mail" />
             <span>
-              <b>Email draft prepared.</b> Nothing has been sent.
-              {cvName ? ` Attach ${cvName} before you send.` : " "}
-              Open the draft and send it from your email app. <a href={draftHref}>Open email draft</a>
+              <b>Thank you!</b> We&apos;ve received your application and will be in touch if your
+              profile is a match.
             </span>
           </>
         )}
       </div>
 
-      <button type="submit" className="btn btn-red">
-        Prepare My Application <Icon name="i-arrow" />
+      <button type="submit" className="btn btn-red" disabled={status === "sending"}>
+        {status === "sending" ? "Submitting…" : "Submit application"} <Icon name="i-arrow" />
       </button>
     </form>
   );

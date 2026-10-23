@@ -11,8 +11,8 @@ const footerSolutions = [
   "ai-content",
   "ai-marketing",
   "ai-sales",
-  "business-automation",
   "ai-engineers",
+  "business-automation",
 ]
   .map((slug) => solutions.find((s) => s.slug === slug)!)
   .map((s) => ({
@@ -68,7 +68,13 @@ export function Footer() {
       <div className="wrap ftr-top">
         <div>
           <Link href="/" className="flogo" aria-label="BrandSparkX home">
-            <Image src="/brand/brand-logo-light.webp" alt="BrandSparkX" width={186} height={26} style={{ width: 'auto', height: 'auto' }} />
+            <Image
+              src="/brand/brand-logo-light.webp"
+              alt="BrandSparkX"
+              width={186}
+              height={26}
+              style={{ width: "auto", height: "auto" }}
+            />
           </Link>
           <div className="tagl">
             Build. Automate.
@@ -103,19 +109,6 @@ export function Footer() {
         </div>
 
         <div>
-          <h2 className="fh">Our locations</h2>
-          {site.offices.map((o) => (
-            <div className="loc" key={o.city}>
-              <Icon name="i-pin" />
-              <address>
-                <strong>{o.city}</strong>
-                {o.address}
-              </address>
-            </div>
-          ))}
-        </div>
-
-        <div>
           <h2 className="fh">Contact us</h2>
           <div className="cl">
             <a href={site.phoneHref}>
@@ -133,7 +126,10 @@ export function Footer() {
               </span>
             </a>
           </div>
-          <h2 className="fh fh-sub">Careers</h2>
+        </div>
+
+        <div>
+          <h2 className="fh">Careers</h2>
           <div className="cl">
             <a href={site.careers.phoneHref}>
               <Icon name="i-phone" />
@@ -165,6 +161,21 @@ export function Footer() {
               </li>
             ))}
           </ul>
+        </div>
+
+        <div className="ftr-locs">
+          <h2 className="fh">Our locations</h2>
+          <div className="ftr-locs__grid">
+            {site.offices.map((o) => (
+              <div className="loc" key={o.city}>
+                <Icon name="i-pin" />
+                <address>
+                  <strong>{o.city}</strong>
+                  {o.address}
+                </address>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

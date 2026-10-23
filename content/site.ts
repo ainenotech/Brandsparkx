@@ -69,6 +69,16 @@ export const site = {
       phone: "",
       phoneHref: "",
     },
+    {
+      city: "Gandhinagar",
+      address: "13th Floor, GIFT Tower One, GIFT City, Gandhinagar, Gujarat",
+      streetAddress: "13th Floor, GIFT Tower One, GIFT City",
+      locality: "Gandhinagar",
+      postalCode: "",
+      country: "IN",
+      phone: "",
+      phoneHref: "",
+    },
   ],
 } as const;
 

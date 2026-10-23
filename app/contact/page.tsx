@@ -13,7 +13,9 @@ export const metadata = pageMetadata({
 });
 
 export default function ContactPage() {
-  const [dubai, bengaluru] = site.offices;
+  const office = (locality: string) => site.offices.find((o) => o.locality === locality)!;
+  const dubai = office("Dubai");
+  const bengaluru = office("Bengaluru");
 
   return (
     <div className="page on contact-page">

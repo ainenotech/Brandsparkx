@@ -163,12 +163,14 @@ describe("lib/validation", () => {
       expect(careerRules.portfolio("linkedin.com/in/amina")).toBe(false);
     });
 
-    it("accepts a PDF CV and rejects other files", () => {
-      expect(isCareerCv(null)).toBe(true);
+    it("requires a PDF, DOC or DOCX CV up to 5 MB", () => {
+      const docx = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      expect(isCareerCv(null)).toBe(false);
       expect(isCareerCv(new File(["cv"], "amina.pdf", { type: "application/pdf" }))).toBe(true);
       expect(isCareerCv(new File(["cv"], "amina.PDF", { type: "" }))).toBe(true);
-      expect(isCareerCv(new File(["cv"], "amina.docx", { type: "" }))).toBe(false);
-      expect(isCareerCv(new File(["cv"], "amina.doc", { type: "application/msword" }))).toBe(false);
+      expect(isCareerCv(new File(["cv"], "amina.doc", { type: "application/msword" }))).toBe(true);
+      expect(isCareerCv(new File(["cv"], "amina.docx", { type: docx }))).toBe(true);
+      expect(isCareerCv(new File(["cv"], "amina.png", { type: "image/png" }))).toBe(false);
       expect(isCareerCv(new File(["cv"], "amina.exe", { type: "application/pdf" }))).toBe(false);
       expect(isCareerCv(new File([new Uint8Array(maxCvBytes + 1)], "big.pdf"))).toBe(false);
     });
