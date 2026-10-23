@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, type FocusEvent, type FormEvent } from "react";
 import { Icon } from "@/components/Icon";
 import { interests } from "@/content/interests";
-import { site } from "@/content/site";
 import {
   contactFields,
   contactRules,
@@ -11,7 +10,9 @@ import {
   type ContactField,
 } from "@/lib/validation";
 
-type Status = "idle" | "invalid" | "ready";
+type Status = "idle" | "invalid" | "sending" | "sent" | "failed";
+
+const scriptUrl = process.env.NEXT_PUBLIC_CONTACT_SCRIPT_URL;
 
 const messages: Record<ContactField, string> = {
   name: "Enter your name.",
@@ -24,9 +25,10 @@ const messages: Record<ContactField, string> = {
 export function ContactForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const touched = useRef(new Set<ContactField>());
+  // A ref, not state, so a second click before React re-renders is still ignored.
+  const sending = useRef(false);
   const [errors, setErrors] = useState<Partial<Record<ContactField, boolean>>>({});
   const [status, setStatus] = useState<Status>("idle");
-  const [draftHref, setDraftHref] = useState("");
 
   // `?interest=AI%20Sales` pre-selects that interest; the page also tells the CSS it is the contact page.
   useEffect(() => {
@@ -65,14 +67,12 @@ export function ContactForm() {
   const onInput = (e: FormEvent<HTMLFormElement>) => {
     const name = fieldName(e.target);
     if (name && errors[name]) check(name);
-    if (status === "ready") {
-      setStatus("idle");
-      setDraftHref("");
-    }
+    if (status === "sent") setStatus("idle");
   };
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (sending.current) return;
     const form = e.currentTarget;
     const results = contactFields.map((name) => [name, check(name)] as const);
     const firstInvalid = results.find(([, ok]) => !ok)?.[0];
@@ -83,33 +83,36 @@ export function ContactForm() {
     }
 
     const fd = new FormData(form);
-    const data = {
+    const payload = {
       name: String(fd.get("name") ?? "").trim(),
       company: String(fd.get("company") ?? "").trim(),
       email: String(fd.get("email") ?? "").trim(),
       phone: String(fd.get("phone") ?? "").trim(),
       website: String(fd.get("website") ?? "").trim(),
-      interests: fd.getAll("interest").map(String),
+      services: fd.getAll("interest").map(String),
       message: String(fd.get("message") ?? "").trim(),
+      hp: String(fd.get("hp") ?? ""),
     };
-    const body = [
-      `Name: ${data.name}`,
-      data.company && `Company: ${data.company}`,
-      `Work email: ${data.email}`,
-      data.phone && `Phone: ${data.phone}`,
-      data.website && `Website: ${data.website}`,
-      data.interests.length > 0 && `Interested in: ${data.interests.join(", ")}`,
-      "",
-      "Message:",
-      data.message,
-    ]
-      .filter(Boolean)
-      .join("\n");
-    const subject = `Project enquiry from ${data.name}`;
-    setDraftHref(
-      `mailto:${site.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
-    );
-    setStatus("ready");
+
+    sending.current = true;
+    setStatus("sending");
+    try {
+      if (!scriptUrl) throw new Error("NEXT_PUBLIC_CONTACT_SCRIPT_URL is not set");
+      // No Content-Type header: it keeps this a simple text/plain request, so the
+      // browser skips the CORS preflight that Apps Script cannot answer.
+      const res = await fetch(scriptUrl, { method: "POST", body: JSON.stringify(payload) });
+      const result = (await res.json()) as { ok?: boolean; error?: string };
+      if (!result.ok) throw new Error(result.error || "Submission rejected");
+      form.reset();
+      touched.current.clear();
+      setErrors({});
+      setStatus("sent");
+    } catch (err) {
+      console.error("Contact form submission failed", err);
+      setStatus("failed");
+    } finally {
+      sending.current = false;
+    }
   };
 
   // Shared props for each validated field.
@@ -183,6 +186,15 @@ export function ContactForm() {
           ))}
         </div>
       </fieldset>
+      {/* Honeypot: hidden from people and assistive tech; bots that fill it are dropped server-side. */}
+      <input
+        type="text"
+        name="hp"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ display: "none" }}
+      />
       <div className={fieldClass("message", true)}>
         <label htmlFor="f-message">
           Message <i>*</i>
@@ -196,33 +208,40 @@ export function ContactForm() {
         {errorText("message")}
       </div>
 
-      <div className={status === "invalid" ? "fstate e show" : "fstate e"} role="alert">
+      <div
+        className={status === "invalid" || status === "failed" ? "fstate e show" : "fstate e"}
+        role="alert"
+      >
         {status === "invalid" && (
           <>
             <Icon name="i-info" />
             <span>Some fields need attention. Check the highlighted fields and try again.</span>
           </>
         )}
+        {status === "failed" && (
+          <>
+            <Icon name="i-info" />
+            <span>
+              Something went wrong. Please try again or email us at{" "}
+              <a href="mailto:prasant@brandsparkx.com">prasant@brandsparkx.com</a>.
+            </span>
+          </>
+        )}
       </div>
-      <div className={status === "ready" ? "fstate s show" : "fstate s"} role="status">
-        {status === "ready" && (
+      <div className={status === "sent" ? "fstate s show" : "fstate s"} role="status">
+        {status === "sent" && (
           <>
             <Icon name="i-mail" />
             <span>
-              <b>Email draft prepared.</b> Nothing has been sent. Open the draft and send it from
-              your email app.{" "}
-              <a href={draftHref}>Open email draft</a>
+              <b>Thank you!</b> We&apos;ve received your message and will get back to you within
+              24 hours.
             </span>
           </>
         )}
       </div>
 
-      <button
-        type="submit"
-        className="btn btn-red"
-      >
-        {status === "ready" ? "Update email draft" : "Prepare email draft"}{" "}
-        <Icon name="i-arrow" />
+      <button type="submit" className="btn btn-red" disabled={status === "sending"}>
+        {status === "sending" ? "Sending…" : "Send message"} <Icon name="i-arrow" />
       </button>
     </form>
   );

@@ -1,8 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ContactForm } from "@/components/contact/ContactForm";
-import { site } from "@/content/site";
+
+// The component reads the endpoint at module load, so set it before the import runs.
+const SCRIPT_URL = vi.hoisted(() => {
+  const url = "https://script.google.com/macros/s/test/exec";
+  process.env.NEXT_PUBLIC_CONTACT_SCRIPT_URL = url;
+  return url;
+});
 
 describe("ContactForm Component", () => {
   const originalLocation = window.location;
@@ -16,6 +22,8 @@ describe("ContactForm Component", () => {
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
     Object.defineProperty(window, "location", {
       value: originalLocation,
       writable: true,
@@ -47,50 +55,89 @@ describe("ContactForm Component", () => {
 
   it("blocks form submission when invalid and displays error banner", async () => {
     render(<ContactForm />);
-    const submitBtn = screen.getByRole("button", { name: /prepare email draft/i });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const submitBtn = screen.getByRole("button", { name: /send message/i });
 
     fireEvent.click(submitBtn);
 
     expect(
       screen.getByText("Some fields need attention. Check the highlighted fields and try again."),
     ).toBeInTheDocument();
-    expect(screen.queryByText(/Email draft prepared/i)).not.toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("builds the correct mailto URL with encoded subject and body when form is valid", async () => {
+  async function fillValidForm() {
     const user = userEvent.setup();
     render(<ContactForm />);
-
-    const nameInput = screen.getByLabelText(/Name/i);
-    const emailInput = screen.getByLabelText(/Work email/i);
-    const phoneInput = screen.getByLabelText(/WhatsApp \/ phone/i);
-    const messageInput = screen.getByLabelText(/Message/i);
-    const voiceInterestCheckbox = screen.getByRole("checkbox", { name: "AI Voice & Calling" });
-
-    await user.type(nameInput, "Jane Doe");
-    await user.type(emailInput, "jane@example.com");
-    await user.type(phoneInput, "+971 50 123 4567");
-    await user.type(messageInput, "We want to build an AI voice assistant for appointments.");
-    await user.click(voiceInterestCheckbox);
-
-    const submitBtn = screen.getByRole("button", { name: /prepare email draft/i });
-    await user.click(submitBtn);
-
-    const statusBanner = screen.getByRole("status");
-    expect(statusBanner).toBeInTheDocument();
-    expect(screen.getByText(/Email draft prepared/i)).toBeInTheDocument();
-
-    const openDraftLink = screen.getByRole("link", { name: /open email draft/i });
-    const href = openDraftLink.getAttribute("href");
-
-    expect(href).not.toBeNull();
-    expect(href).toContain(`mailto:${site.email}?subject=`);
-    expect(href).toContain(encodeURIComponent("Project enquiry from Jane Doe"));
-    expect(href).toContain(encodeURIComponent("Work email: jane@example.com"));
-    expect(href).toContain(encodeURIComponent("Interested in: AI Voice & Calling"));
-    expect(href).toContain(
-      encodeURIComponent("We want to build an AI voice assistant for appointments."),
+    await user.type(screen.getByLabelText(/Name/i), "Jane Doe");
+    await user.type(screen.getByLabelText(/Work email/i), "jane@example.com");
+    await user.type(screen.getByLabelText(/WhatsApp \/ phone/i), "+971 50 123 4567");
+    await user.type(
+      screen.getByLabelText(/Message/i),
+      "We want to build an AI voice assistant for appointments.",
     );
+    await user.click(screen.getByRole("checkbox", { name: "AI Voice & Calling" }));
+    await user.click(screen.getByRole("checkbox", { name: "AI Sales" }));
+    return user;
+  }
+
+  it("posts the payload as a simple text/plain request and resets on success", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({ ok: true }) });
+    vi.stubGlobal("fetch", fetchMock);
+    const user = await fillValidForm();
+
+    await user.click(screen.getByRole("button", { name: /send message/i }));
+
+    expect(await screen.findByText(/Thank you!/i)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(SCRIPT_URL);
+    expect(init.method).toBe("POST");
+    expect(init.headers).toBeUndefined();
+    expect(JSON.parse(init.body)).toEqual({
+      name: "Jane Doe",
+      company: "",
+      email: "jane@example.com",
+      phone: "+971 50 123 4567",
+      website: "",
+      services: expect.arrayContaining(["AI Sales", "AI Voice & Calling"]),
+      message: "We want to build an AI voice assistant for appointments.",
+      hp: "",
+    });
+    expect(screen.getByLabelText(/Name/i)).toHaveValue("");
+  });
+
+  it("disables the button while sending and ignores double submits", async () => {
+    let resolve!: (v: unknown) => void;
+    const fetchMock = vi.fn(() => new Promise((r) => (resolve = r)));
+    vi.stubGlobal("fetch", fetchMock);
+    const user = await fillValidForm();
+
+    const submitBtn = screen.getByRole("button", { name: /send message/i });
+    await user.click(submitBtn);
+    expect(submitBtn).toBeDisabled();
+    expect(submitBtn).toHaveTextContent("Sending…");
+    fireEvent.submit(submitBtn.closest("form")!);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    resolve({ json: async () => ({ ok: true }) });
+    expect(await screen.findByText(/Thank you!/i)).toBeInTheDocument();
+  });
+
+  it("shows an error and keeps the input when the script returns ok:false", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ json: async () => ({ ok: false, error: "boom" }) }),
+    );
+    const user = await fillValidForm();
+
+    await user.click(screen.getByRole("button", { name: /send message/i }));
+
+    expect(await screen.findByText(/Something went wrong/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Name/i)).toHaveValue("Jane Doe");
+    expect(screen.getByRole("button", { name: /send message/i })).toBeEnabled();
   });
 
   it("preselects the interest checkbox when ?interest= is in query string", () => {
