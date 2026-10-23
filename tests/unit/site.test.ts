@@ -41,6 +41,7 @@ describe("content/site", () => {
 
     it("matches office phoneHref with displayed office phone for each office", () => {
       for (const office of site.offices) {
+        if (!office.phone) continue;
         const phoneDigits = cleanDigits(office.phone);
         const hrefDigits = cleanDigits(office.phoneHref);
         expect(office.phoneHref.startsWith("tel:")).toBe(true);

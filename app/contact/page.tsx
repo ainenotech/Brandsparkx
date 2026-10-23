@@ -101,7 +101,7 @@ export default function ContactPage() {
               <Icon name="i-arrow" />
             </a>
 
-            {[dubai, bengaluru].map((office, index) => (
+            {site.offices.map((office, index) => (
               <article className="contact-office-glass" key={office.city}>
                 <div className="contact-office-heading">
                   <span className="contact-office-index">0{index + 1}</span>
@@ -116,7 +116,7 @@ export default function ContactPage() {
                 >
                   Get directions <Icon name="i-arrow" />
                 </a>
-                {office.phoneHref !== site.phoneHref && (
+                {office.phoneHref && office.phoneHref !== site.phoneHref && (
                   <a className="contact-office-phone" href={office.phoneHref}>
                     {office.phone}
                   </a>

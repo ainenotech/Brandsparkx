@@ -4474,10 +4474,13 @@ html[data-brand-intro-active] .brand-intro {
 html[data-brand-intro-active] .brand-intro::before {
   animation: brand-intro-ambience 2.1s ease-out both;
 }
+/* The mark matches /brand/brand-logo.webp exactly, so the handoff lands on the header logo.
+   Wordmark and X positions below are measured from that logo, in % of the mark. */
 .brand-intro__mark {
+  --brand-intro-mark-w: min(86vw, 480px);
   position: relative;
-  width: min(86vw, 480px);
-  aspect-ratio: 480 / 57;
+  width: var(--brand-intro-mark-w);
+  aspect-ratio: 2098 / 293;
   transform: scale(1);
   transform-origin: center;
 }
@@ -4506,11 +4509,10 @@ html[data-brand-intro-active] .brand-intro__mark::after {
 }
 .brand-intro__wordmark {
   position: absolute;
-  top: 50%;
-  left: 0;
-  width: 84.5%;
+  top: 21.16%;
+  left: 0.1%;
+  width: 84.46%;
   clip-path: inset(0 0 0 100%);
-  transform: translateY(-50%);
 }
 .brand-intro__wordmark img {
   width: 100%;
@@ -4519,9 +4521,9 @@ html[data-brand-intro-active] .brand-intro__mark::after {
 .brand-intro__x {
   position: absolute;
   top: 50%;
-  left: 50%;
-  width: 14.2%;
-  aspect-ratio: 152 / 127;
+  left: 91.16%;
+  width: 17.49%;
+  aspect-ratio: 240 / 189;
   isolation: isolate;
   transform: translate(-50%, -50%);
 }
@@ -4635,12 +4637,13 @@ html[data-brand-intro-active] .brand-intro__wordmark {
     transform: translateX(15vw) scale(0.18);
   }
 }
+/* Starts at the centre of the mark, then settles into its place after the K. */
 @keyframes brand-intro-x-slide {
   from {
-    transform: translate(-50%, -50%) scale(3);
+    transform: translate(calc(-50% - var(--brand-intro-mark-w) * 0.4116), -50%) scale(3);
   }
   to {
-    transform: translate(calc(-50% + min(35.4vw, 200px)), -50%) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 @keyframes brand-intro-wordmark-reveal {
@@ -4692,7 +4695,7 @@ html[data-brand-intro-active] .brand-intro__wordmark {
   }
   html[data-brand-intro-active] .brand-intro__x {
     animation: none !important;
-    transform: translate(calc(-50% + min(35.4vw, 200px)), -50%);
+    transform: translate(-50%, -50%);
   }
   html[data-brand-intro-active] .brand-intro__x img {
     animation: none !important;

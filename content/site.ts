@@ -58,6 +58,17 @@ export const site = {
       phone: "+91 93532 25524",
       phoneHref: "tel:+919353225524",
     },
+    {
+      city: "United States",
+      address: "3838 Andrew Johnson Hwy, Limestone, TN 37681, United States",
+      streetAddress: "3838 Andrew Johnson Hwy",
+      locality: "Limestone",
+      postalCode: "37681",
+      country: "US",
+      // No local number for this office yet; leave empty to hide it.
+      phone: "",
+      phoneHref: "",
+    },
   ],
 } as const;
 

@@ -70,10 +70,10 @@ export function EntranceIntro() {
     <div className="brand-intro" aria-hidden="true">
       <span className="brand-intro__x-stinger">
         <Image
-          src="/brand/intro-x.png"
+          src="/brand/intro-logo-x.png"
           alt=""
-          width={152}
-          height={127}
+          width={240}
+          height={189}
           priority
           unoptimized
         />
@@ -81,10 +81,10 @@ export function EntranceIntro() {
       <div className="brand-intro__mark">
         <span className="brand-intro__wordmark">
           <Image
-            src="/brand/intro-wordmark-light.png"
+            src="/brand/intro-logo-wordmark.png"
             alt=""
-            width={406}
-            height={51}
+            width={820}
+            height={75}
             priority
             unoptimized
             sizes="(max-width: 558px) 72vw, 406px"
@@ -93,13 +93,13 @@ export function EntranceIntro() {
         </span>
         <span className="brand-intro__x brand-intro__x--assembly">
           <Image
-            src="/brand/intro-x.png"
+            src="/brand/intro-logo-x.png"
             alt=""
-            width={152}
-            height={127}
+            width={240}
+            height={189}
             priority
             unoptimized
-            sizes="(max-width: 558px) 12vw, 68px"
+            sizes="(max-width: 558px) 15vw, 84px"
             onError={finishIntro}
           />
         </span>

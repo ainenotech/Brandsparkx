@@ -77,7 +77,7 @@ export function officesJsonLd() {
     name: `${site.name} — ${o.city}`,
     url: SITE_URL,
     image: `${SITE_URL}/og.png`,
-    telephone: o.phone,
+    ...(o.phone ? { telephone: o.phone } : {}),
     email: site.email,
     parentOrganization: { "@id": `${SITE_URL}/#organization` },
     address: {
