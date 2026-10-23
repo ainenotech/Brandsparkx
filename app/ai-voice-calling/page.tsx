@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { FlowSection } from "@/components/flow/FlowSection";
 import { FinalCta } from "@/components/FinalCta";
 import { Icon, type IconName } from "@/components/Icon";
 import { JsonLd } from "@/components/JsonLd";
@@ -128,6 +129,8 @@ export default function VoicePage() {
           </div>
         </div>
       </div>
+
+      <FlowSection id="voice" />
 
       <section>
         <div className="wrap">

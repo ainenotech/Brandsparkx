@@ -31,6 +31,8 @@ describe("Footer Component", () => {
       name: new RegExp(site.careers.email, "i"),
     });
     expect(careersEmailLink).toHaveAttribute("href", `mailto:${site.careers.email}`);
+
+    expect(screen.getByRole("link", { name: "View careers" })).toHaveAttribute("href", "/careers");
   });
 
   it("ensures solutions list starts with 'AI Voice & Calling'", () => {

@@ -151,7 +151,14 @@ export function ContactForm() {
         <label htmlFor="f-email">
           Work email <i>*</i>
         </label>
-        <input {...field("email")} type="email" autoComplete="email" required maxLength={254} />
+        <input
+          {...field("email")}
+          type="email"
+          autoComplete="email"
+          required
+          maxLength={254}
+          suppressHydrationWarning
+        />
         {errorText("email")}
       </div>
       <div className={fieldClass("phone")}>

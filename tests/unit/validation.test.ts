@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  careerFields,
+  careerRequiredFields,
+  careerRules,
   contactFields,
   contactRules,
+  isCareerCv,
+  maxCvBytes,
   requiredFields,
 } from "@/lib/validation";
 
@@ -129,6 +134,48 @@ describe("lib/validation", () => {
       expect(
         contactRules.message("We would like to automate our customer service operations."),
       ).toBe(true);
+    });
+  });
+
+  describe("careerRules", () => {
+    it("requires name, email, and position", () => {
+      expect(careerRequiredFields).toEqual(["name", "email", "position"]);
+      for (const field of careerRequiredFields) {
+        expect(careerFields).toContain(field);
+      }
+    });
+
+    it("rejects an empty position and accepts a role name", () => {
+      expect(careerRules.position("")).toBe(false);
+      expect(careerRules.position("A")).toBe(false);
+      expect(careerRules.position("AI Engineer")).toBe(true);
+    });
+
+    it("allows an empty location and only listed values", () => {
+      expect(careerRules.location("")).toBe(true);
+      expect(careerRules.location("Dubai, UAE")).toBe(true);
+      expect(careerRules.location("London")).toBe(false);
+    });
+
+    it("uses the contact link rule for an optional portfolio link", () => {
+      expect(careerRules.portfolio("")).toBe(true);
+      expect(careerRules.portfolio("https://linkedin.com/in/amina")).toBe(true);
+      expect(careerRules.portfolio("linkedin.com/in/amina")).toBe(false);
+    });
+
+    it("accepts a PDF CV and rejects other files", () => {
+      expect(isCareerCv(null)).toBe(true);
+      expect(isCareerCv(new File(["cv"], "amina.pdf", { type: "application/pdf" }))).toBe(true);
+      expect(isCareerCv(new File(["cv"], "amina.PDF", { type: "" }))).toBe(true);
+      expect(isCareerCv(new File(["cv"], "amina.docx", { type: "" }))).toBe(false);
+      expect(isCareerCv(new File(["cv"], "amina.doc", { type: "application/msword" }))).toBe(false);
+      expect(isCareerCv(new File(["cv"], "amina.exe", { type: "application/pdf" }))).toBe(false);
+      expect(isCareerCv(new File([new Uint8Array(maxCvBytes + 1)], "big.pdf"))).toBe(false);
+    });
+
+    it("accepts an empty experience and message", () => {
+      expect(careerRules.experience("")).toBe(true);
+      expect(careerRules.message("")).toBe(true);
     });
   });
 });

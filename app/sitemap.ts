@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       .map((s) => ({ path: `/solutions/${s.slug}`, priority: 0.8 })),
     { path: "/work", priority: 0.6 },
     { path: "/about", priority: 0.6 },
+    { path: "/careers", priority: 0.6 },
     { path: "/contact", priority: 0.7 },
   ];
   return pages.map((p) => ({
