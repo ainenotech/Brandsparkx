@@ -3216,14 +3216,40 @@ fieldset.fld {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 70px;
-  height: 260px;
-  opacity: 0.5;
+  bottom: 40px;
+  height: 340px;
+  opacity: 0.8;
   pointer-events: none;
 }
 .skyline svg {
   width: 100%;
   height: 100%;
+}
+/* far-back depth layer: no outlines, just subtle shape */
+.skyline-far rect {
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 0.4px;
+  vector-effect: non-scaling-stroke;
+}
+/* mid-layer buildings: subtle architectural outline */
+.skyline-bg rect,
+.skyline-bg polygon {
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 0.7px;
+  vector-effect: non-scaling-stroke;
+}
+/* foreground iconic towers: cleaner, slightly brighter outline */
+.skyline-fg polygon,
+.skyline-fg rect {
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 0.8px;
+  vector-effect: non-scaling-stroke;
+}
+/* antenna lines on towers */
+.skyline-antenna {
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 0.6px;
+  vector-effect: non-scaling-stroke;
 }
 /* Big outlined brand watermark inside footer */
 .ftr-brand-bg {
@@ -3381,19 +3407,49 @@ fieldset.fld {
   color: #7e7e88;
   font: 500 0.72rem var(--mono);
 }
-/* Offices run as one row across the bottom of the footer. */
+/* ── Locations section — premium glass cards ── */
 .ftr-locs {
   grid-column: 1 / -1;
-  padding-top: clamp(24px, 2.5vw, 32px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: clamp(28px, 3vw, 40px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 .ftr-locs__grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(20px, 3vw, 40px);
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 .ftr-locs .loc {
   margin-bottom: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 20px 18px;
+  gap: 12px;
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease,
+    transform 0.35s var(--ease);
+}
+.ftr-locs .loc:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+.ftr-locs .loc svg {
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  filter: drop-shadow(0 0 4px rgba(216, 50, 50, 0.3));
+}
+.ftr-locs .loc strong {
+  font-size: 0.98rem;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.ftr-locs .loc address {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #8a8a94;
 }
 .ftr-bot {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -3426,7 +3482,11 @@ fieldset.fld {
     grid-template-columns: 1fr 1fr;
   }
   .ftr-locs__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .skyline {
+    height: 260px;
+    opacity: 0.6;
   }
 }
 @media (max-width: 600px) {
@@ -3439,6 +3499,10 @@ fieldset.fld {
   .ftr-bot {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .skyline {
+    height: 180px;
+    opacity: 0.45;
   }
 }
 

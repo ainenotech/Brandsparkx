@@ -47,6 +47,52 @@ export const solutions: Solution[] = [
       "AI voice agents in Dubai that answer inbound calls, run outbound calling, qualify leads and book appointments 24/7 — without growing your headcount.",
   },
   {
+    slug: "business-automation",
+    key: "automation",
+    icon: "i-auto",
+    title: "Business Automation",
+    shortTitle: "Automation",
+    headline: "Automate the work behind your business.",
+    description:
+      "Connect your systems, data and workflows so repetitive work happens automatically.",
+    capabilities: [
+      "Workflow automation",
+      "Process automation",
+      "System integration",
+      "AI agents",
+      "CRM workflows",
+      "Business operations",
+    ],
+    linkLabel: "Explore Business Automation",
+    interest: "Business Automation",
+    seoTitle: "AI Business Automation Services in Dubai | BrandSparkX",
+    seoDescription:
+      "AI business automation in Dubai: workflow and process automation, system integration and AI agents that connect your tools so repetitive work runs itself.",
+  },
+  {
+    slug: "ai-sales",
+    key: "sales",
+    icon: "i-sales",
+    title: "AI Sales",
+    shortTitle: "AI Sales",
+    headline: "Turn more leads into opportunities.",
+    description:
+      "AI can qualify, engage, follow up and support your sales team — helping your business move faster from enquiry to revenue.",
+    capabilities: [
+      "Lead qualification",
+      "AI follow-up",
+      "Appointment booking",
+      "Sales workflows",
+      "CRM automation",
+      "AI agents",
+    ],
+    linkLabel: "Explore AI Sales",
+    interest: "AI Sales",
+    seoTitle: "AI Sales Automation Services in Dubai | BrandSparkX",
+    seoDescription:
+      "AI sales automation for UAE businesses: lead qualification, AI follow-up and appointment booking that move every enquiry faster towards revenue.",
+  },
+  {
     slug: "ai-growth",
     key: "growth",
     icon: "i-growth",
@@ -112,52 +158,6 @@ export const solutions: Solution[] = [
     seoTitle: "AI Marketing Automation Services in Dubai | BrandSparkX",
     seoDescription:
       "AI marketing automation in Dubai: lead generation, CRM and WhatsApp automation and lead nurturing, connected into intelligent workflows by BrandSparkX.",
-  },
-  {
-    slug: "ai-sales",
-    key: "sales",
-    icon: "i-sales",
-    title: "AI Sales",
-    shortTitle: "AI Sales",
-    headline: "Turn more leads into opportunities.",
-    description:
-      "AI can qualify, engage, follow up and support your sales team — helping your business move faster from enquiry to revenue.",
-    capabilities: [
-      "Lead qualification",
-      "AI follow-up",
-      "Appointment booking",
-      "Sales workflows",
-      "CRM automation",
-      "AI agents",
-    ],
-    linkLabel: "Explore AI Sales",
-    interest: "AI Sales",
-    seoTitle: "AI Sales Automation Services in Dubai | BrandSparkX",
-    seoDescription:
-      "AI sales automation for UAE businesses: lead qualification, AI follow-up and appointment booking that move every enquiry faster towards revenue.",
-  },
-  {
-    slug: "business-automation",
-    key: "automation",
-    icon: "i-auto",
-    title: "Business Automation",
-    shortTitle: "Automation",
-    headline: "Automate the work behind your business.",
-    description:
-      "Connect your systems, data and workflows so repetitive work happens automatically.",
-    capabilities: [
-      "Workflow automation",
-      "Process automation",
-      "System integration",
-      "AI agents",
-      "CRM workflows",
-      "Business operations",
-    ],
-    linkLabel: "Explore Business Automation",
-    interest: "Business Automation",
-    seoTitle: "AI Business Automation Services in Dubai | BrandSparkX",
-    seoDescription:
-      "AI business automation in Dubai: workflow and process automation, system integration and AI agents that connect your tools so repetitive work runs itself.",
   },
   {
     slug: "ai-engineers",

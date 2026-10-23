@@ -26,6 +26,13 @@ export const metadata = pageMetadata({
 
 const smallCards = [
   {
+    href: "/solutions/ai-sales",
+    icon: "i-sales",
+    title: "AI Sales",
+    tag: "Turn leads into conversations.",
+    text: "Use AI to qualify leads, follow up, engage prospects and move every opportunity forward.",
+  },
+  {
     href: "/solutions/ai-growth",
     icon: "i-growth",
     title: "AI Growth",
@@ -45,13 +52,6 @@ const smallCards = [
     title: "AI Marketing",
     tag: "Make marketing more intelligent.",
     text: "Automate lead generation, nurturing, CRM and WhatsApp workflows.",
-  },
-  {
-    href: "/solutions/business-automation",
-    icon: "i-auto",
-    title: "Business Automation",
-    tag: "Connect your business. Automate the work.",
-    text: "Connect people, tools and data so repetitive work runs itself.",
   },
   {
     href: "/ai-engineers",
@@ -251,18 +251,17 @@ export default function HomePage() {
                 ))}
               </div>
             </Link>
-            <Link href="/solutions/ai-sales" className="sol feat rv">
+            <Link href="/solutions/business-automation" className="sol feat rv">
               <span className="ic">
-                <Icon name="i-sales" />
+                <Icon name="i-auto" />
               </span>
               <span className="go">
                 <Icon name="i-arrow" />
               </span>
-              <h3>AI Sales</h3>
-              <div className="tag">Turn leads into conversations.</div>
+              <h3>Business Automation</h3>
+              <div className="tag">Connect your business. Automate the work.</div>
               <p>
-                Use AI to qualify leads, follow up, engage prospects and move every opportunity
-                forward.
+                Connect people, tools and data so repetitive work runs itself.
               </p>
             </Link>
             {smallCards.map((c) => (
