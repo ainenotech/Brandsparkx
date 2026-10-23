@@ -42,7 +42,7 @@ export function organizationJsonLd() {
     "@id": `${SITE_URL}/#organization`,
     name: site.name,
     url: SITE_URL,
-    logo: `${SITE_URL}/brand/logo.webp`,
+    logo: `${SITE_URL}/brand/brand-logo.webp`,
     email: site.email,
     telephone: site.phone,
     slogan: site.tagline,

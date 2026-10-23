@@ -24,11 +24,11 @@ export const site = {
   phone: "+971 55 996 3778",
   phoneHref: "tel:+971559963778",
   whatsappHref: "https://wa.me/971559963778",
-  /** Careers contact shown in the footer. Placeholder values — replace before launch. */
+  /** Careers contact shown in the footer. */
   careers: {
-    phone: "+971 50 000 0000",
-    phoneHref: "tel:+971500000000",
-    email: "careers@brandsparkx.com",
+    phone: "+971 52 564 8489",
+    phoneHref: "tel:+971525648489",
+    email: "hr@brandsparkx.com",
   },
   primaryContact: {
     name: "Krishna Patil",

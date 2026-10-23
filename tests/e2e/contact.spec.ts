@@ -1,5 +1,4 @@
 import { expect, test, type Page } from "@playwright/test";
-import { site } from "@/content/site";
 
 async function waitForIntro(page: Page) {
   await expect(page.locator("body")).not.toHaveClass(/brand-intro-active/, { timeout: 10000 });
@@ -35,7 +34,15 @@ test.describe("Contact Form E2E", () => {
     await expect(page.locator("div.fstate.s.show")).not.toBeVisible();
   });
 
-  test("fills contact form happy path and prepares mailto draft link", async ({ page }) => {
+  test("fills contact form happy path and submits to the Apps Script endpoint", async ({
+    page,
+  }) => {
+    let body: Record<string, unknown> | null = null;
+    await page.route("https://script.google.com/**", async (route) => {
+      body = JSON.parse(route.request().postData() ?? "{}");
+      await route.fulfill({ contentType: "application/json", body: '{"ok":true}' });
+    });
+
     await page.goto("/contact", { waitUntil: "domcontentloaded" });
     await waitForIntro(page);
 
@@ -56,16 +63,14 @@ test.describe("Contact Form E2E", () => {
     // Status banner is displayed
     const statusBanner = page.locator("div.fstate.s.show");
     await expect(statusBanner).toBeVisible();
-    await expect(statusBanner).toContainText("Email draft prepared");
+    await expect(statusBanner).toContainText("Thank you!");
 
-    // Verify draft link href
-    const draftLink = statusBanner.locator("a");
-    const href = await draftLink.getAttribute("href");
-    expect(href).not.toBeNull();
-    expect(href).toContain(`mailto:${site.email}?subject=`);
-    expect(href).toContain(encodeURIComponent("Project enquiry from Johnathan Smith"));
-    expect(href).toContain(encodeURIComponent("Acme Logistics"));
-    expect(href).toContain(encodeURIComponent("AI Voice & Calling"));
+    expect(body).toMatchObject({
+      name: "Johnathan Smith",
+      company: "Acme Logistics",
+      services: ["AI Voice & Calling"],
+      hp: "",
+    });
   });
 
   test("preselects the interest checkbox from ?interest= query param", async ({ page }) => {
