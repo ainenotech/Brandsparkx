@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { nav } from "@/content/site";
 
 export function Header() {
@@ -11,6 +11,8 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPath, setMenuPath] = useState(pathname);
+  const burgerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
 
   // Close the mobile menu whenever the route changes.
   if (menuPath !== pathname) {
@@ -25,15 +27,30 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // The original CSS drives the mobile menu from a class on <body>.
+  // The original CSS drives the mobile menu (and the scroll lock) from a class on <body>.
   useEffect(() => {
     document.body.classList.toggle("menu-open", menuOpen);
     if (!menuOpen) return;
+    const burger = burgerRef.current;
+    const menu = menuRef.current;
+    menu?.querySelector("a")?.focus({ preventScroll: true });
+    const close = () => setMenuOpen(false);
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === "Escape") close();
+    };
+    // A tap outside both the menu and the burger closes it.
+    const onPointer = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (!menu?.contains(target) && !burger?.contains(target)) close();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointer);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointer);
+      // Hand focus back to the burger if it was inside the closing menu.
+      if (menu?.contains(document.activeElement)) burger?.focus({ preventScroll: true });
+    };
   }, [menuOpen]);
 
   const isActive = (href: string) =>
@@ -76,6 +93,7 @@ export function Header() {
             {renderNavigationLinks()}
           </nav>
           <button
+            ref={burgerRef}
             type="button"
             className="burger"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -87,7 +105,7 @@ export function Header() {
           </button>
         </div>
       </header>
-      <nav className="mnav" id="mnav" aria-label="Mobile">
+      <nav className="mnav" id="mnav" aria-label="Mobile" ref={menuRef}>
         {renderNavigationLinks()}
       </nav>
     </>

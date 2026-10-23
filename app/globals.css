@@ -6125,3 +6125,149 @@ html[data-brand-intro-active] .brand-intro__wordmark {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ===== Responsive pass: small screens, touch and viewport fixes ===== */
+
+/* Grid columns may shrink below their content's width, so long words and the code demo
+   stay inside the column instead of being cut off at the screen edge. */
+.pgrid > * {
+  min-width: 0;
+}
+.stack div,
+.csr dd {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  /* The left-hand floating chip on the engineers hero hangs 40px outside its card. */
+  .pvis .fchip[style*="left"] {
+    left: 8px !important;
+  }
+  .ed-code {
+    font-size: 0.72rem;
+  }
+}
+@media (max-width: 420px) {
+  .stack {
+    grid-template-columns: 1fr;
+  }
+  .stack div {
+    padding: 22px 20px;
+  }
+  /* Case card facts: label above value instead of a cramped two-column row. */
+  .csr {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .csr dd + dt {
+    margin-top: 10px;
+  }
+}
+
+/* 16px fields on phones stop iOS zooming in when a field is focused. */
+@media (max-width: 768px) {
+  .fld input,
+  .fld textarea,
+  .fld select,
+  .contact-page .fld input:not([type="checkbox"]),
+  .contact-page .fld textarea,
+  .career-apply .fld input,
+  .career-apply .fld textarea,
+  .career-apply .fld select,
+  .job-board-search input {
+    font-size: 16px;
+  }
+}
+@media (max-width: 480px) {
+  .contact-page .form .btn {
+    justify-self: stretch;
+    justify-content: center;
+  }
+}
+
+/* Full-height panels use the dynamic viewport so mobile browser bars don't cut them off. */
+.chat {
+  height: min(580px, calc(100dvh - 140px));
+}
+
+/* Lock page scroll behind the open mobile menu. */
+body.menu-open {
+  overflow: hidden;
+}
+/* Become visible at once on open so the first link can take focus straight away. */
+.menu-open .mnav {
+  transition:
+    opacity 0.3s,
+    transform 0.3s var(--ease),
+    visibility 0s;
+}
+.mnav {
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Touch screens: give small links and icon buttons a 44px tap area. */
+@media (pointer: coarse) {
+  .link,
+  .crumb a,
+  .ftr-bot nav a,
+  .contact-directions-link,
+  .contact-office-phone {
+    position: relative;
+  }
+  .link::before,
+  .crumb a::before,
+  .ftr-bot nav a::before,
+  .contact-directions-link::before,
+  .contact-office-phone::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    right: -6px;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+  .ftr ul {
+    gap: 0;
+  }
+  .ftr ul a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .cl a {
+    min-height: 44px;
+  }
+  .soc a,
+  .vplay {
+    width: 44px;
+    height: 44px;
+  }
+  .opts span,
+  .contact-page .opts span {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .jump a {
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+  .btn {
+    min-height: 44px;
+  }
+  .tcard {
+    touch-action: pan-y;
+  }
+}
+
+/* Header: on narrow phones the logo may shrink so the menu button never pushes past the edge
+   (Safari still lets the page scroll sideways when it does). */
+.hdr .logo {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.hdr .logo img {
+  max-width: 100%;
+}
+.hdr .burger {
+  flex: none;
+}
