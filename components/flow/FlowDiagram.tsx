@@ -39,7 +39,10 @@ const TOP_DELAY = [0, 0.85, 1.7];
 const BOTTOM_DELAY = [0.4, 1.3, 2.1];
 const ICON = "#3A3F4B";
 
-type Wire = { d: string; delay: number };
+/** Which part of the flow an element belongs to, so a page can spotlight one part at a time. */
+export type FlowZone = "in" | "hub" | "out";
+
+type Wire = { d: string; delay: number; zone: FlowZone };
 type Anchor = "center" | "start" | "bottom" | "top";
 
 function columns(count: number): number[] {
@@ -72,12 +75,15 @@ function wiresFor(flow: FlowConfig): Wire[] {
   const inputs = columns(flow.inputs.length).map((x, index) => ({
     d: inputPath(x),
     delay: TOP_DELAY[index] ?? 0,
+    zone: "in" as const,
   }));
   const outputs = columns(flow.outputs.length).map((x, index) => ({
     d: outputPath(x),
     delay: BOTTOM_DELAY[index] ?? 0,
+    zone: "out" as const,
   }));
-  return [...inputs, { d: `M ${CENTER},${HUB_BOTTOM} V ${CHECK_TOP}`, delay: 1.2 }, ...outputs];
+  const hub = { d: `M ${CENTER},${HUB_BOTTOM} V ${CHECK_TOP}`, delay: 1.2, zone: "hub" as const };
+  return [...inputs, hub, ...outputs];
 }
 
 function labelWidth(count: number): number {
@@ -100,6 +106,7 @@ function Pin({
   height,
   anchor = "center",
   delay,
+  zone,
   children,
 }: {
   x: number;
@@ -108,11 +115,13 @@ function Pin({
   height?: number;
   anchor?: Anchor;
   delay: number;
+  zone: FlowZone;
   children: ReactNode;
 }) {
   return (
     <div
       className={anchor === "center" ? "dflow-pin" : `dflow-pin ${anchor}`}
+      data-zone={zone}
       style={{
         left: `${(x / STAGE_W) * 100}%`,
         top: `${(y / STAGE_H) * 100}%`,
@@ -228,7 +237,13 @@ export function FlowDiagram({
         >
           <svg className="dflow-wires" viewBox={`0 0 ${STAGE_W} ${STAGE_H}`} aria-hidden="true">
             {wires.map((wire) => (
-              <path key={wire.d} className="dflow-line" d={wire.d} pathLength={100} />
+              <path
+                key={wire.d}
+                className="dflow-line"
+                d={wire.d}
+                pathLength={100}
+                data-zone={wire.zone}
+              />
             ))}
             {wires.map((wire) => (
               <path
@@ -236,6 +251,7 @@ export function FlowDiagram({
                 className="dflow-pulse"
                 d={wire.d}
                 pathLength={100}
+                data-zone={wire.zone}
                 style={{ ["--delay" as string]: `${wire.delay}s` }}
               />
             ))}
@@ -251,10 +267,11 @@ export function FlowDiagram({
                   width={labelWidth(flow.inputs.length)}
                   anchor="bottom"
                   delay={index * 60}
+                  zone="in"
                 >
                   <NodeCopy label={node.label} sub={node.sub} />
                 </Pin>
-                <Pin x={x} y={INPUT_CY} width={TILE} height={TILE} delay={index * 60}>
+                <Pin x={x} y={INPUT_CY} width={TILE} height={TILE} delay={index * 60} zone="in">
                   <div className="dflow-tile">
                     <NodeGlyph node={node} />
                   </div>
@@ -263,7 +280,7 @@ export function FlowDiagram({
             );
           })}
 
-          <Pin x={CENTER} y={HUB_CY} width={HUB} height={HUB} delay={hubDelay}>
+          <Pin x={CENTER} y={HUB_CY} width={HUB} height={HUB} delay={hubDelay} zone="hub">
             <div className="dflow-hub">
               <span className="dflow-ring" aria-hidden="true" />
               <span className="dflow-mark" />
@@ -275,16 +292,17 @@ export function FlowDiagram({
             width={STAGE_W - HUB_LABEL_X - 4}
             anchor="start"
             delay={hubDelay}
+            zone="hub"
           >
             <NodeCopy label={flow.hub.label} sub={flow.hub.sub} kind="hub" />
           </Pin>
 
-          <Pin x={CENTER} y={CHECK_CY} width={CHECK} height={CHECK} delay={checkDelay}>
+          <Pin x={CENTER} y={CHECK_CY} width={CHECK} height={CHECK} delay={checkDelay} zone="out">
             <div className="dflow-tile dflow-check">
               <SealCheck size={16} weight="regular" color="var(--flow-accent)" aria-hidden="true" />
             </div>
           </Pin>
-          <Pin x={206} y={CHECK_CY} width={142} anchor="start" delay={checkDelay}>
+          <Pin x={206} y={CHECK_CY} width={142} anchor="start" delay={checkDelay} zone="out">
             <NodeCopy label={flow.check.label} sub={flow.check.sub} kind="check" />
           </Pin>
 
@@ -298,6 +316,7 @@ export function FlowDiagram({
                   width={TILE}
                   height={TILE}
                   delay={checkDelay + 60 + index * 60}
+                  zone="out"
                 >
                   <div className="dflow-tile">
                     <NodeGlyph node={node} duotone />
@@ -326,6 +345,7 @@ export function FlowDiagram({
                   height={OUTPUT_LABEL_H}
                   anchor="top"
                   delay={checkDelay + 60 + index * 60}
+                  zone="out"
                 >
                   <NodeCopy label={node.label} sub={node.sub} kind="out" />
                 </Pin>

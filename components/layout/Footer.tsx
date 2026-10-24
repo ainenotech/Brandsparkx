@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
+import { FooterWordmark } from "@/components/layout/FooterWordmark";
 import { Skyline } from "@/components/layout/Skyline";
 import { site } from "@/content/site";
 import { solutionHref, solutions } from "@/content/solutions";
@@ -27,14 +28,8 @@ const mapsHref = (address: string) =>
 export function Footer() {
   return (
     <footer className="ftr">
-      <div className="ftr-brand-bg" aria-hidden="true">
-        <span>
-          {"BRANDSPARKX".split("").map((letter, index) => (
-            <span key={`${letter}-${index}`} aria-hidden="true">
-              {letter}
-            </span>
-          ))}
-        </span>
+      <div className="ftr-brand-bg">
+        <FooterWordmark />
       </div>
 
       <Skyline />
@@ -97,6 +92,7 @@ export function Footer() {
               </Link>
               <div className="soc">
                 <a
+                  className="soc-wa"
                   href={site.whatsappHref}
                   target="_blank"
                   rel="noopener noreferrer"

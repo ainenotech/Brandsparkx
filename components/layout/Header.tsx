@@ -15,7 +15,7 @@ const ctaLink = nav.find((item) => item.href === CTA_HREF);
 type Box = { x: number; w: number };
 
 /**
- * Moves a nav marker (hover pill or active chip) onto a box. It glides when it is already
+ * Moves a nav marker (hover pill or active dot) onto a box. It glides when it is already
  * showing and snaps into place when it first appears, so it never sweeps in from the left edge.
  */
 function moveMarker(marker: HTMLElement, box: Box | null, animate: boolean) {
@@ -71,28 +71,28 @@ export function Header() {
     };
   }, []);
 
-  // The active chip sits behind the current page's link and glides across on navigation.
-  const syncActiveChip = useCallback((animate: boolean) => {
+  // The active dot sits centred under the current page's link and glides across on navigation.
+  const syncActiveDot = useCallback((animate: boolean) => {
     const links = linksRef.current;
-    const chip = activeRef.current;
-    if (!links || !chip) return;
+    const dot = activeRef.current;
+    if (!links || !dot) return;
     const link = links.querySelector<HTMLElement>('a[aria-current="page"]');
-    moveMarker(chip, link ? { x: link.offsetLeft, w: link.offsetWidth } : null, animate);
+    moveMarker(dot, link ? { x: link.offsetLeft + link.offsetWidth / 2, w: 0 } : null, animate);
   }, []);
 
   useLayoutEffect(() => {
-    syncActiveChip(true);
-  }, [pathname, syncActiveChip]);
+    syncActiveDot(true);
+  }, [pathname, syncActiveDot]);
 
   // Re-measure without animating when the nav reflows (resize, web fonts swapping in).
   useEffect(() => {
     const links = linksRef.current;
     if (!links || typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(() => syncActiveChip(false));
+    const observer = new ResizeObserver(() => syncActiveDot(false));
     observer.observe(links);
-    document.fonts?.ready.then(() => syncActiveChip(false));
+    document.fonts?.ready.then(() => syncActiveDot(false));
     return () => observer.disconnect();
-  }, [syncActiveChip]);
+  }, [syncActiveDot]);
 
   const showPill = (e: PointerEvent<HTMLAnchorElement> | FocusEvent<HTMLAnchorElement>) => {
     const link = e.currentTarget;

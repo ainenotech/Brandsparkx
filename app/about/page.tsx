@@ -252,11 +252,7 @@ export default function AboutPage() {
         <Link href="/contact" className="btn btn-red">
           Start a Conversation <Icon name="i-arrow" />
         </Link>
-        <Link
-          href="#team"
-          className="btn"
-          style={{ color: "#fff", border: "1.5px solid rgba(255,255,255,.2)" }}
-        >
+        <Link href="#team" className="btn btn-glass">
           Meet the team
         </Link>
       </FinalCta>

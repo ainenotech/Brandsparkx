@@ -1,9 +1,22 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { CaseCards } from "@/components/home/CaseCards";
 import { cases, type CaseStudy } from "@/content/cases";
 
 describe("CaseCards", () => {
+  beforeEach(() => {
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      configurable: true,
+      value: (query: string) => ({
+        matches: false,
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }),
+    });
+  });
+
   it("shows example use cases without demo labels or placeholder impact text", () => {
     const { container } = render(<CaseCards items={cases} />);
 

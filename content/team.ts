@@ -5,12 +5,13 @@ export type TeamMember = {
   bio: string;
   /** Path under /public, e.g. "/team/krishna.webp". Leave empty until a photo is approved. */
   photo?: string;
-  email?: string;
   /**
-   * Public LinkedIn profile URL. TODO(team): add for each member (shown as a LinkedIn link on
-   * the team cards and used as sameAs in their Person structured data).
+   * Full LinkedIn profile URL, e.g. "https://www.linkedin.com/in/handle/". Makes the card's
+   * LinkedIn badge a link and is used as sameAs in the Person structured data.
+   * TODO(team): add for each member.
    */
   linkedin?: string;
+  email?: string;
   phoneHref?: string;
   lead?: boolean;
   published: boolean;
@@ -26,6 +27,7 @@ export const team: TeamMember[] = [
     email: "Krishna@brandsparkx.com",
     phoneHref: "tel:+971559963778",
     lead: true,
+    linkedin: "", // add profile URL
     published: true,
   },
   {
@@ -34,6 +36,7 @@ export const team: TeamMember[] = [
     role: "Leadership · Partner & CTO",
     bio: "AI technology, engineering, technical strategy and product development.",
     photo: "/team/tirth-patel.webp",
+    linkedin: "", // add profile URL
     published: true,
   },
   {
@@ -43,6 +46,7 @@ export const team: TeamMember[] = [
     role: "Partner | High Growth Strategist",
     bio: "Growth strategy, customer acquisition and marketing expertise.",
     photo: "/team/ratnesh.jpeg",
+    linkedin: "", // add profile URL
     published: true,
   },
   {
@@ -52,6 +56,7 @@ export const team: TeamMember[] = [
     role: "Head of Paid Media",
     bio: "Leads paid media strategy and performance campaigns.",
     photo: "/team/scott.webp",
+    linkedin: "", // add profile URL
     published: true,
   },
 ];

@@ -228,11 +228,14 @@ const roofLights = [
   { col: 4, cx: 1106, cy: 113, beacon: false },
 ];
 
-// Car lights drifting along the road line (wide screens only, see globals.css).
+// Car lights speeding along the road line in both directions (wide screens only, see
+// globals.css). Each crosses in the first 75% of its cycle, ~5–6s on screen, then waits off
+// screen; the negative delays put cars mid-road as soon as the footer scrolls into view.
 const cars = [
-  { y: 256.6, w: 16, color: "#FFD27A", dur: "26s", delay: "-4s", reverse: false },
-  { y: 257.6, w: 12, color: "#E11D2E", dur: "34s", delay: "-19s", reverse: true },
-  { y: 256.6, w: 14, color: "#FFD27A", dur: "41s", delay: "-30s", reverse: false },
+  { y: 256.6, w: 22, color: "#FFD27A", dur: "12s", delay: "-5s", reverse: false },
+  { y: 257.6, w: 20, color: "#E11D2E", dur: "11s", delay: "-2.5s", reverse: true },
+  { y: 256.6, w: 18, color: "#E11D2E", dur: "14s", delay: "-10s", reverse: false },
+  { y: 257.6, w: 22, color: "#FFD27A", dur: "15s", delay: "-12s", reverse: true },
 ];
 
 const waterTank = (x: number, roof: number) => (
@@ -476,7 +479,7 @@ export function Skyline() {
           </g>
         ))}
 
-        {/* road with a few drifting car lights */}
+        {/* road with a few speeding car lights */}
         <line
           x1="-480"
           y1="257.5"

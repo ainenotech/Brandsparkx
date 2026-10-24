@@ -36,4 +36,25 @@ export const clientLogos: ClientLogo[] = [
     height: 161,
   },
   { name: "ZippSlip", logo: "/clients/zippslip.webp", width: 443, height: 168 },
+  // Cut from screenshots; replace with the original artwork (ideally SVG) when available.
+  {
+    name: "Dubai Economy and Tourism",
+    logo: "/clients/dubai-economy-tourism.webp",
+    width: 160,
+    height: 106,
+  },
+  {
+    name: "Brand Spark Digital Media",
+    logo: "/clients/brand-spark-digital-media.webp",
+    width: 216,
+    height: 86,
+  },
+  { name: "Royal Citadel", logo: "/clients/royal-citadel.webp", width: 258, height: 94 },
+  { name: "Pure Consulting", logo: "/clients/pure-consulting.webp", width: 256, height: 82 },
+  {
+    name: "Ellington Properties",
+    logo: "/clients/ellington-properties.webp",
+    width: 268,
+    height: 106,
+  },
 ];
