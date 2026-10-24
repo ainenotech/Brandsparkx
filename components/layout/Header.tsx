@@ -209,8 +209,8 @@ export function Header() {
           >
             <span />
           </button>
+          <span className="hdr-progress" aria-hidden="true" />
         </div>
-        <span className="hdr-progress" aria-hidden="true" />
       </header>
       <div className="mnav" id="mnav" ref={menuRef}>
         <nav aria-label="Mobile">
