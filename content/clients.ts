@@ -8,16 +8,16 @@ export type ClientLogo = {
 
 /** Add approved client logos here. While empty, six placeholder slots are shown (if placeholders are on). */
 export const clientLogos: ClientLogo[] = [
-  { name: "Tata 1mg", logo: "/clients/tata-1mg.webp", width: 48, height: 48 },
-  { name: "Zydus Lifesciences", logo: "/clients/zydus-lifesciences.webp", width: 50, height: 43 },
+  { name: "Tata 1mg", logo: "/clients/tata-1mg.webp", width: 480, height: 107 },
+  { name: "Zydus Lifesciences", logo: "/clients/zydus-lifesciences.webp", width: 367, height: 200 },
   {
     name: "Cadila Pharmaceuticals",
     logo: "/clients/cadila-pharmaceuticals.webp",
-    width: 43,
-    height: 48,
+    width: 480,
+    height: 179,
   },
   { name: "Indira IVF", logo: "/clients/indira-ivf.webp", width: 161, height: 36 },
-  { name: "Petpooja", logo: "/clients/petpooja.webp", width: 230, height: 222 },
+  { name: "Petpooja", logo: "/clients/petpooja.webp", width: 383, height: 73 },
   { name: "Jumbo King", logo: "/clients/jumbo-king.webp", width: 294, height: 170 },
   { name: "Aajpakao", logo: "/clients/aajpakao.webp", width: 279, height: 214 },
   { name: "Airroad", logo: "/clients/airroad.webp", width: 470, height: 194 },
