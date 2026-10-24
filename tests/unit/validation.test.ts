@@ -78,45 +78,51 @@ describe("lib/validation", () => {
       expect(contactRules.phone("")).toBe(true);
     });
 
-    it("accepts valid phone numbers with + country code, spaces, and brackets", () => {
-      expect(contactRules.phone("+971 55 996 3778")).toBe(true);
-      expect(contactRules.phone("+91 93532 25524")).toBe(true);
-      expect(contactRules.phone("(123) 456-7890")).toBe(true);
-      expect(contactRules.phone("+1-800-555-0199")).toBe(true);
+    it("accepts real numbers for their country in E.164", () => {
       expect(contactRules.phone("+971559963778")).toBe(true);
+      expect(contactRules.phone("+919353225524")).toBe(true);
+      expect(contactRules.phone("+12025550123")).toBe(true);
+      expect(contactRules.phone("+966501234567")).toBe(true);
     });
 
-    it("rejects numbers that are too short (<7 chars)", () => {
-      expect(contactRules.phone("12345")).toBe(false);
+    it("rejects numbers that are too short or not valid for their country", () => {
+      expect(contactRules.phone("+97155")).toBe(false);
       expect(contactRules.phone("+123")).toBe(false);
+      expect(contactRules.phone("+971123")).toBe(false);
     });
 
-    it("rejects strings containing letters or invalid characters", () => {
+    it("rejects strings containing letters", () => {
       expect(contactRules.phone("+971 55 CALL ME")).toBe(false);
       expect(contactRules.phone("phone1234567")).toBe(false);
     });
   });
 
-  describe("contactRules.website", () => {
-    it("accepts empty string as website is optional", () => {
-      expect(contactRules.website("")).toBe(true);
+  describe("contact website", () => {
+    it("is not validated (optional free text like www.example.com)", () => {
+      expect(contactFields).not.toContain("website");
+    });
+  });
+
+  describe("careerRules.portfolio", () => {
+    it("accepts empty string as portfolio is optional", () => {
+      expect(careerRules.portfolio("")).toBe(true);
     });
 
-    it("accepts http and https websites", () => {
-      expect(contactRules.website("https://brandsparkx.com")).toBe(true);
-      expect(contactRules.website("http://example.org")).toBe(true);
-      expect(contactRules.website("https://sub.domain.co/path?param=1")).toBe(true);
+    it("accepts http and https links", () => {
+      expect(careerRules.portfolio("https://brandsparkx.com")).toBe(true);
+      expect(careerRules.portfolio("http://example.org")).toBe(true);
+      expect(careerRules.portfolio("https://sub.domain.co/path?param=1")).toBe(true);
     });
 
-    it("rejects websites missing scheme", () => {
-      expect(contactRules.website("brandsparkx.com")).toBe(false);
-      expect(contactRules.website("www.brandsparkx.com")).toBe(false);
+    it("rejects links missing scheme", () => {
+      expect(careerRules.portfolio("brandsparkx.com")).toBe(false);
+      expect(careerRules.portfolio("www.brandsparkx.com")).toBe(false);
     });
 
     it("rejects non-http(s) schemes or malformed URLs", () => {
-      expect(contactRules.website("ftp://example.com")).toBe(false);
-      expect(contactRules.website("javascript:alert(1)")).toBe(false);
-      expect(contactRules.website("https://")).toBe(false);
+      expect(careerRules.portfolio("ftp://example.com")).toBe(false);
+      expect(careerRules.portfolio("javascript:alert(1)")).toBe(false);
+      expect(careerRules.portfolio("https://")).toBe(false);
     });
   });
 
@@ -138,8 +144,8 @@ describe("lib/validation", () => {
   });
 
   describe("careerRules", () => {
-    it("requires name, email, and position", () => {
-      expect(careerRequiredFields).toEqual(["name", "email", "position"]);
+    it("requires name, email, position, experience, and location", () => {
+      expect(careerRequiredFields).toEqual(["name", "email", "position", "experience", "location"]);
       for (const field of careerRequiredFields) {
         expect(careerFields).toContain(field);
       }
@@ -151,13 +157,13 @@ describe("lib/validation", () => {
       expect(careerRules.position("AI Engineer")).toBe(true);
     });
 
-    it("allows an empty location and only listed values", () => {
-      expect(careerRules.location("")).toBe(true);
+    it("requires a location from the listed values", () => {
+      expect(careerRules.location("")).toBe(false);
       expect(careerRules.location("Dubai, UAE")).toBe(true);
       expect(careerRules.location("London")).toBe(false);
     });
 
-    it("uses the contact link rule for an optional portfolio link", () => {
+    it("accepts an optional http(s) portfolio link", () => {
       expect(careerRules.portfolio("")).toBe(true);
       expect(careerRules.portfolio("https://linkedin.com/in/amina")).toBe(true);
       expect(careerRules.portfolio("linkedin.com/in/amina")).toBe(false);
@@ -175,8 +181,14 @@ describe("lib/validation", () => {
       expect(isCareerCv(new File([new Uint8Array(maxCvBytes + 1)], "big.pdf"))).toBe(false);
     });
 
-    it("accepts an empty experience and message", () => {
-      expect(careerRules.experience("")).toBe(true);
+    it("requires experience", () => {
+      expect(careerRules.experience("")).toBe(false);
+      expect(careerRules.experience("   ")).toBe(false);
+      expect(careerRules.experience("3 years")).toBe(true);
+      expect(careerRules.experience("Fresher")).toBe(true);
+    });
+
+    it("accepts an empty message", () => {
       expect(careerRules.message("")).toBe(true);
     });
   });

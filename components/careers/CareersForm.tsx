@@ -1,8 +1,22 @@
 "use client";
 
-import { useRef, useState, type FocusEvent, type FormEvent } from "react";
+import {
+  BriefcaseIcon,
+  EnvelopeSimpleIcon,
+  FileTextIcon,
+  LinkSimpleIcon,
+  MapPinIcon,
+  UploadSimpleIcon,
+  UserIcon,
+  UsersThreeIcon,
+} from "@phosphor-icons/react";
+import { useEffect, useRef, useState, type FocusEvent, type FormEvent } from "react";
+import { APPLY_EVENT } from "@/components/careers/CareerBoard";
+import { FormSuccess } from "@/components/forms/FormSuccess";
+import { IconField } from "@/components/forms/IconField";
+import { PhoneField } from "@/components/forms/PhoneField";
 import { Icon } from "@/components/Icon";
-import { careerLocations } from "@/content/careers";
+import { careerLocations, careerPositions } from "@/content/careers";
 import { postToScript } from "@/lib/postToScript";
 import {
   careerFields,
@@ -15,14 +29,16 @@ import {
 
 type Status = "idle" | "invalid" | "sending" | "sent" | "failed";
 
-const messages: Record<Exclude<CareerField, "experience" | "message">, string> = {
+const messages: Record<Exclude<CareerField, "message">, string> = {
   name: "Enter your name.",
   email: "Enter a valid email, like name@company.com.",
-  phone: "Use digits, spaces and an optional leading +.",
-  position: "Enter the position you are applying for.",
-  location: "Choose a location.",
+  phone: "Enter a valid number for the selected country.",
+  position: "Choose the team you're applying for.",
+  experience: "Enter your experience, e.g. 3 years or Fresher.",
+  location: "Choose your location.",
   portfolio: "Enter a full address starting with http:// or https://.",
 };
+const otherPositionMessage = "Enter the position you are applying for.";
 
 const cvMessage = "Upload your CV as a PDF, DOC or DOCX file up to 5 MB.";
 const cvAccept = [".pdf", ".doc", ".docx", ...cvMimeTypes].join(",");
@@ -31,6 +47,8 @@ const failMessage =
 
 // Show the script's own message when it is about the CV (type, size or missing file).
 const isCvError = (message: string) => /\b(cv|resume|file)\b/i.test(message);
+
+const OTHER = "Other";
 
 function readAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -41,18 +59,44 @@ function readAsDataUrl(file: File) {
   });
 }
 
+function formatSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function CareersForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const touched = useRef(new Set<CareerField>());
   const cvRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<Partial<Record<CareerField, boolean>>>({});
   const [cvError, setCvError] = useState(false);
-  const [cvName, setCvName] = useState("");
+  const [cv, setCv] = useState<{ name: string; size: number } | null>(null);
   const [cvOver, setCvOver] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState(failMessage);
+  // Phone is held in E.164 (e.g. "+971501234567"); undefined while empty.
+  const [phone, setPhone] = useState<string | undefined>();
+  // Team from the select; "Other" reveals a free-text field.
+  const [positionChoice, setPositionChoice] = useState("");
+  const [positionOther, setPositionOther] = useState("");
+  const [sentTo, setSentTo] = useState("");
   // A ref, not state, so a second click before React re-renders is still ignored.
   const sending = useRef(false);
+
+  // "Apply" on a team card: pre-fill Position, bring the form into view, focus Name.
+  useEffect(() => {
+    const onApply = (event: Event) => {
+      const team = (event as CustomEvent<string>).detail;
+      setPositionChoice(team);
+      setErrors((current) => ({ ...current, position: false }));
+      const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      document.getElementById("apply")?.scrollIntoView?.({ behavior: reduce ? "auto" : "smooth" });
+      document.getElementById("c-name")?.focus({ preventScroll: true });
+    };
+    window.addEventListener(APPLY_EVENT, onApply);
+    return () => window.removeEventListener(APPLY_EVENT, onApply);
+  }, []);
 
   const selectedCv = () => cvRef.current?.files?.[0] ?? null;
 
@@ -62,19 +106,27 @@ export function CareersForm() {
     return ok;
   };
 
+  const position = positionChoice === OTHER ? positionOther.trim() : positionChoice;
+
   const valueOf = (name: CareerField) => {
+    if (name === "phone") return phone ?? "";
+    if (name === "position") return position;
     const field = formRef.current?.elements.namedItem(name);
     return field && "value" in field ? field.value : "";
   };
 
-  const check = (name: CareerField) => {
-    const ok = careerRules[name](valueOf(name));
+  const check = (name: CareerField, value = valueOf(name)) => {
+    const ok = careerRules[name](value);
     setErrors((current) => ({ ...current, [name]: !ok }));
     return ok;
   };
 
+  // Fields are matched by id (`c-<name>`), so the phone input and the "Other" position
+  // text field, which have no matching name, count too.
   const fieldName = (target: EventTarget) => {
-    const name = (target as HTMLInputElement).name as CareerField;
+    const name = (target as HTMLElement).id
+      ?.replace(/^c-/, "")
+      .replace(/-other$/, "") as CareerField;
     return careerFields.includes(name) ? name : null;
   };
 
@@ -87,20 +139,36 @@ export function CareersForm() {
 
   const onEdit = (event: FormEvent<HTMLFormElement>) => {
     const name = fieldName(event.target);
-    if (name && errors[name]) check(name);
-    if (status === "sent") setStatus("idle");
+    // Phone and position re-check from their own handlers, once the new value is known.
+    if (name && name !== "phone" && name !== "position" && errors[name]) check(name);
+  };
+
+  const onPhoneChange = (value?: string) => {
+    setPhone(value);
+    if (errors.phone) check("phone", value ?? "");
+  };
+
+  const onPositionChoice = (value: string) => {
+    setPositionChoice(value);
+    if (errors.position) check("position", value === OTHER ? positionOther.trim() : value);
+  };
+
+  const onPositionOther = (value: string) => {
+    setPositionOther(value);
+    if (errors.position) check("position", value.trim());
   };
 
   const onCv = () => {
-    setCvName(selectedCv()?.name ?? "");
+    const file = selectedCv();
+    setCv(file ? { name: file.name, size: file.size } : null);
     if (cvError) checkCv();
-    if (status === "sent") setStatus("idle");
   };
 
   const clearCv = () => {
     if (cvRef.current) cvRef.current.value = "";
     onCv();
     setCvError(false);
+    cvRef.current?.focus();
   };
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -110,11 +178,16 @@ export function CareersForm() {
     const results = careerFields.map((name) => [name, check(name)] as const);
     const firstInvalid = results.find(([, ok]) => !ok)?.[0];
     const cvOk = checkCv();
-    const cv = selectedCv();
-    if (firstInvalid || !cvOk || !cv) {
+    const file = selectedCv();
+    if (firstInvalid || !cvOk || !file) {
       setStatus("invalid");
-      if (firstInvalid) (form.elements.namedItem(firstInvalid) as HTMLElement).focus();
-      else cvRef.current?.focus();
+      if (firstInvalid === "position" && positionChoice === OTHER) {
+        document.getElementById("c-position-other")?.focus();
+      } else if (firstInvalid) {
+        document.getElementById(`c-${firstInvalid}`)?.focus();
+      } else {
+        cvRef.current?.focus();
+      }
       return;
     }
 
@@ -123,25 +196,29 @@ export function CareersForm() {
     try {
       const data = new FormData(form);
       const read = (name: string) => String(data.get(name) ?? "").trim();
+      const name = read("name");
       await postToScript({
         formType: "career",
-        name: read("name"),
+        name,
         email: read("email"),
-        phone: read("phone"),
-        position: read("position"),
+        phone: phone ?? "",
+        position,
         experience: read("experience"),
         location: read("location"),
         linkedin: read("portfolio"),
         message: read("message"),
-        resume: { name: cv.name, type: cv.type, data: await readAsDataUrl(cv) },
+        resume: { name: file.name, type: file.type, data: await readAsDataUrl(file) },
         hp: String(data.get("hp") ?? ""),
       });
       form.reset();
-      if (cvRef.current) cvRef.current.value = "";
-      setCvName("");
-      setCvError(false);
       touched.current.clear();
       setErrors({});
+      setPhone(undefined);
+      setPositionChoice("");
+      setPositionOther("");
+      setCv(null);
+      setCvError(false);
+      setSentTo(name.split(/\s+/)[0]);
       setStatus("sent");
     } catch (err) {
       console.error("Career application failed", err);
@@ -153,23 +230,35 @@ export function CareersForm() {
     }
   };
 
+  if (status === "sent") {
+    return (
+      <FormSuccess
+        title={`Thank you${sentTo ? `, ${sentTo}` : ""}!`}
+        text="We've received your application and will be in touch if your profile is a match."
+      />
+    );
+  }
+
+  const errorId = (name: CareerField) => `c-${name}-msg`;
   const field = (name: CareerField) => ({
     name,
     id: `c-${name}`,
     "aria-invalid": errors[name] || undefined,
-    "aria-describedby": errors[name] ? `c-${name}-msg` : undefined,
+    "aria-describedby": errors[name] ? errorId(name) : undefined,
   });
   const fieldClass = (name: CareerField, full = false) =>
     ["fld", full && "full", errors[name] && "err"].filter(Boolean).join(" ");
-  const errorText = (name: Exclude<CareerField, "experience" | "message">) => (
-    <span className="msg" id={`c-${name}-msg`}>
-      {messages[name]}
-    </span>
-  );
+  const errorText = (name: Exclude<CareerField, "message">) =>
+    errors[name] && (
+      <span className="msg" id={errorId(name)}>
+        {name === "position" && positionChoice === OTHER ? otherPositionMessage : messages[name]}
+      </span>
+    );
+  const otherInvalid = errors.position && positionChoice === OTHER;
 
   return (
     <form
-      className="form"
+      className="form cf-form"
       ref={formRef}
       noValidate
       onSubmit={onSubmit}
@@ -179,79 +268,131 @@ export function CareersForm() {
     >
       <div className={fieldClass("name")}>
         <label htmlFor="c-name">
-          Name <i>*</i>
+          Name <i aria-hidden="true">*</i>
         </label>
-        <input
-          {...field("name")}
-          autoComplete="name"
-          required
-          maxLength={100}
-          placeholder="Enter your name"
-        />
+        <IconField icon={<UserIcon />}>
+          <input
+            {...field("name")}
+            autoComplete="name"
+            required
+            maxLength={100}
+            placeholder="Your full name"
+          />
+        </IconField>
         {errorText("name")}
       </div>
       <div className={fieldClass("email")}>
         <label htmlFor="c-email">
-          Email <i>*</i>
+          Email <i aria-hidden="true">*</i>
         </label>
-        <input
-          {...field("email")}
-          type="email"
-          autoComplete="email"
-          required
-          maxLength={254}
-          placeholder="Enter your email"
-          suppressHydrationWarning
-        />
+        <IconField icon={<EnvelopeSimpleIcon />}>
+          <input
+            {...field("email")}
+            type="email"
+            autoComplete="email"
+            required
+            maxLength={254}
+            placeholder="you@example.com"
+            suppressHydrationWarning
+          />
+        </IconField>
         {errorText("email")}
       </div>
       <div className={fieldClass("phone")}>
         <label htmlFor="c-phone">Phone</label>
-        <input
-          {...field("phone")}
-          type="tel"
-          autoComplete="tel"
-          placeholder="Enter your phone number"
-          maxLength={30}
+        <PhoneField
+          id="c-phone"
+          value={phone}
+          onChange={onPhoneChange}
+          invalid={errors.phone}
+          describedBy={errors.phone ? errorId("phone") : undefined}
         />
         {errorText("phone")}
       </div>
       <div className={fieldClass("position")}>
         <label htmlFor="c-position">
-          Position <i>*</i>
+          Position <i aria-hidden="true">*</i>
         </label>
-        <input {...field("position")} required maxLength={120} placeholder="Enter the position" />
+        <IconField icon={<UsersThreeIcon />}>
+          <select
+            id="c-position"
+            name="position-choice"
+            required
+            value={positionChoice}
+            onChange={(e) => onPositionChoice(e.target.value)}
+            aria-invalid={(errors.position && !otherInvalid) || undefined}
+            aria-describedby={errors.position && !otherInvalid ? errorId("position") : undefined}
+          >
+            <option value="">Select a team</option>
+            {careerPositions.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        </IconField>
+        {positionChoice === OTHER && (
+          <input
+            id="c-position-other"
+            name="position-other"
+            className="cf-other"
+            aria-label="Your position"
+            required
+            maxLength={120}
+            placeholder="Which role are you applying for?"
+            value={positionOther}
+            onChange={(e) => onPositionOther(e.target.value)}
+            aria-invalid={otherInvalid || undefined}
+            aria-describedby={otherInvalid ? errorId("position") : undefined}
+          />
+        )}
         {errorText("position")}
       </div>
       <div className={fieldClass("experience")}>
-        <label htmlFor="c-experience">Experience</label>
-        <input {...field("experience")} maxLength={80} placeholder="Enter your experience" />
+        <label htmlFor="c-experience">
+          Experience <i aria-hidden="true">*</i>
+        </label>
+        <IconField icon={<BriefcaseIcon />}>
+          <input {...field("experience")} required maxLength={80} placeholder="e.g. 3 years" />
+        </IconField>
+        {errorText("experience")}
       </div>
       <div className={fieldClass("location")}>
-        <label htmlFor="c-location">Location</label>
-        <select {...field("location")} defaultValue="">
-          <option value="">Select a location</option>
-          {careerLocations.map((location) => (
-            <option key={location} value={location}>
-              {location}
-            </option>
-          ))}
-        </select>
+        <label htmlFor="c-location">
+          Location <i aria-hidden="true">*</i>
+        </label>
+        <IconField icon={<MapPinIcon />}>
+          <select {...field("location")} required defaultValue="">
+            <option value="">Select a location</option>
+            {careerLocations.map((location) => (
+              <option key={location} value={location}>
+                {location}
+              </option>
+            ))}
+          </select>
+        </IconField>
         {errorText("location")}
       </div>
       <div className={fieldClass("portfolio", true)}>
         <label htmlFor="c-portfolio">LinkedIn / Portfolio</label>
-        <input
-          {...field("portfolio")}
-          type="url"
-          placeholder="Enter your LinkedIn or portfolio link"
-          maxLength={200}
-        />
+        <IconField icon={<LinkSimpleIcon />}>
+          <input
+            {...field("portfolio")}
+            type="url"
+            inputMode="url"
+            placeholder="https://linkedin.com/in/yourname"
+            maxLength={200}
+          />
+        </IconField>
         {errorText("portfolio")}
       </div>
       <div className={fieldClass("message", true)}>
         <label htmlFor="c-message">Message</label>
-        <textarea {...field("message")} maxLength={2000} placeholder="Enter your message" />
+        <textarea
+          {...field("message")}
+          maxLength={2000}
+          placeholder="Tell us a little about yourself and what you'd like to work on."
+        />
       </div>
       {/* Honeypot: hidden from people and assistive tech; bots that fill it are dropped server-side. */}
       <input
@@ -264,13 +405,12 @@ export function CareersForm() {
       />
       <div className={["fld", "full", cvError && "err"].filter(Boolean).join(" ")}>
         <label htmlFor="c-cv">
-          CV <i>*</i>
+          CV <i aria-hidden="true">*</i>
         </label>
         <div
-          className={["cv-drop", cvName && "has-file", cvOver && "is-over"]
-            .filter(Boolean)
-            .join(" ")}
+          className={["cv-drop", cv && "has-file", cvOver && "is-over"].filter(Boolean).join(" ")}
         >
+          {/* The real file input covers the box, so click and drag-and-drop both work. */}
           <input
             ref={cvRef}
             id="c-cv"
@@ -285,32 +425,39 @@ export function CareersForm() {
             onDrop={() => setCvOver(false)}
           />
           <span className="cv-drop__icon" aria-hidden="true">
-            <Icon name={cvName ? "i-check" : "i-up"} />
+            {cv ? <FileTextIcon /> : <UploadSimpleIcon />}
           </span>
           <span className="cv-drop__text">
-            <strong>
-              {cvName || (
-                <>
+            {cv ? (
+              <>
+                <strong>{cv.name}</strong>
+                <small id="c-cv-note">{formatSize(cv.size)}</small>
+              </>
+            ) : (
+              <>
+                <strong>
                   <u>Upload your CV</u> or drag it here
-                </>
-              )}
-            </strong>
-            <small id="c-cv-note">PDF, DOC or DOCX, up to 5 MB.</small>
+                </strong>
+                <small id="c-cv-note">PDF, DOC or DOCX, up to 5 MB.</small>
+              </>
+            )}
           </span>
-          {cvName && (
+          {cv && (
             <button
               type="button"
               className="cv-drop__remove"
               onClick={clearCv}
-              aria-label="Remove CV"
+              aria-label={`Remove ${cv.name}`}
             >
               <Icon name="i-x" />
             </button>
           )}
         </div>
-        <span className="msg" id="c-cv-msg">
-          {cvMessage}
-        </span>
+        {cvError && (
+          <span className="msg" id="c-cv-msg">
+            {cvMessage}
+          </span>
+        )}
       </div>
 
       <div
@@ -330,21 +477,12 @@ export function CareersForm() {
           </>
         )}
       </div>
-      <div className={status === "sent" ? "fstate s show" : "fstate s"} role="status">
-        {status === "sent" && (
-          <>
-            <Icon name="i-mail" />
-            <span>
-              <b>Thank you!</b> We&apos;ve received your application and will be in touch if your
-              profile is a match.
-            </span>
-          </>
-        )}
-      </div>
 
-      <button type="submit" className="btn btn-red" disabled={status === "sending"}>
-        {status === "sending" ? "Submitting…" : "Submit application"} <Icon name="i-arrow" />
-      </button>
+      <div className="cf-submit">
+        <button type="submit" className="btn btn-red" disabled={status === "sending"}>
+          {status === "sending" ? "Submitting…" : "Submit application"} <Icon name="i-arrow" />
+        </button>
+      </div>
     </form>
   );
 }

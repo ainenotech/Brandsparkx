@@ -10,6 +10,21 @@ const SCRIPT_URL = vi.hoisted(() => {
   return url;
 });
 
+/** Pretends the browser is in the given IANA time zone. */
+function mockTimeZone(timeZone: string) {
+  const real = Intl.DateTimeFormat;
+  vi.spyOn(Intl, "DateTimeFormat").mockImplementation(((
+    ...args: ConstructorParameters<typeof Intl.DateTimeFormat>
+  ) => {
+    const fmt = new real(...args);
+    const resolved = fmt.resolvedOptions();
+    fmt.resolvedOptions = () => ({ ...resolved, timeZone });
+    return fmt;
+  }) as unknown as typeof Intl.DateTimeFormat);
+}
+
+const countryButton = () => screen.getByRole("button", { name: /Country code/i });
+
 describe("ContactForm Component", () => {
   const originalLocation = window.location;
 
@@ -19,6 +34,7 @@ describe("ContactForm Component", () => {
       writable: true,
       configurable: true,
     });
+    mockTimeZone("Asia/Dubai");
   });
 
   afterEach(() => {
@@ -47,9 +63,10 @@ describe("ContactForm Component", () => {
     expect(screen.getByText("Enter a valid email, like name@company.com.")).toBeInTheDocument();
     expect(emailInput).toHaveAttribute("aria-invalid", "true");
 
-    // Blur message without input
+    // Blur message without input: the hint is replaced by the error
+    expect(screen.getByText("At least 10 characters")).toBeInTheDocument();
     fireEvent.blur(messageInput);
-    expect(screen.getByText(/at least 10 characters/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tell us a little about what you need/i)).toBeInTheDocument();
     expect(messageInput).toHaveAttribute("aria-invalid", "true");
   });
 
@@ -72,7 +89,8 @@ describe("ContactForm Component", () => {
     render(<ContactForm />);
     await user.type(screen.getByLabelText(/Name/i), "Jane Doe");
     await user.type(screen.getByLabelText(/Work email/i), "jane@example.com");
-    await user.type(screen.getByLabelText(/WhatsApp \/ phone/i), "+971 50 123 4567");
+    // National format for the preselected UAE.
+    await user.type(screen.getByLabelText(/WhatsApp \/ phone/i), "50 123 4567");
     await user.type(
       screen.getByLabelText(/Message/i),
       "We want to build an AI voice assistant for appointments.",
@@ -82,14 +100,14 @@ describe("ContactForm Component", () => {
     return user;
   }
 
-  it("posts the payload as a simple text/plain request and resets on success", async () => {
+  it("posts the payload with the phone in E.164 and shows a personal confirmation", async () => {
     const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({ ok: true }) });
     vi.stubGlobal("fetch", fetchMock);
     const user = await fillValidForm();
 
     await user.click(screen.getByRole("button", { name: /send message/i }));
 
-    expect(await screen.findByText(/Thank you!/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Thank you, Jane!" })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe(SCRIPT_URL);
@@ -99,13 +117,138 @@ describe("ContactForm Component", () => {
       name: "Jane Doe",
       company: "",
       email: "jane@example.com",
-      phone: "+971 50 123 4567",
+      phone: "+971501234567",
       website: "",
       services: expect.arrayContaining(["AI Sales", "AI Voice & Calling"]),
       message: "We want to build an AI voice assistant for appointments.",
       hp: "",
     });
+
+    // "Send another message" brings back an empty form.
+    await user.click(screen.getByRole("button", { name: "Send another message" }));
     expect(screen.getByLabelText(/Name/i)).toHaveValue("");
+    expect(screen.getByLabelText(/WhatsApp \/ phone/i)).toHaveValue("");
+  });
+
+  it("accepts any website text without validating it", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({ ok: true }) });
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    render(<ContactForm />);
+    await user.type(screen.getByLabelText(/Name/i), "Jane Doe");
+    await user.type(screen.getByLabelText(/Work email/i), "jane@example.com");
+    const website = screen.getByLabelText(/Website/i);
+    await user.type(website, "www.brandsparkx.com");
+    await user.tab();
+    expect(website).not.toHaveAttribute("aria-invalid");
+    await user.type(screen.getByLabelText(/Message/i), "Just a quick question for you.");
+
+    await user.click(screen.getByRole("button", { name: /send message/i }));
+
+    await screen.findByRole("heading", { name: "Thank you, Jane!" });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).website).toBe("www.brandsparkx.com");
+  });
+
+  it("sends an empty phone when the optional field is left blank", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({ ok: true }) });
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    render(<ContactForm />);
+    await user.type(screen.getByLabelText(/Name/i), "Jane Doe");
+    await user.type(screen.getByLabelText(/Work email/i), "jane@example.com");
+    await user.type(screen.getByLabelText(/Message/i), "Just a quick question for you.");
+
+    await user.click(screen.getByRole("button", { name: /send message/i }));
+
+    await screen.findByRole("heading", { name: "Thank you, Jane!" });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).phone).toBe("");
+  });
+
+  it("shows an inline error for an invalid phone number and blocks submission", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    render(<ContactForm />);
+    const phone = screen.getByLabelText(/WhatsApp \/ phone/i);
+
+    await user.type(phone, "50 12");
+    await user.tab();
+
+    expect(screen.getByText("Enter a valid number for the selected country.")).toBeInTheDocument();
+    expect(phone).toHaveAttribute("aria-invalid", "true");
+
+    await user.click(screen.getByRole("button", { name: /send message/i }));
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    // Completing the number clears the error.
+    await user.type(phone, "3 4567");
+    expect(
+      screen.queryByText("Enter a valid number for the selected country."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("defaults the country to the UAE, or India for an Indian time zone", () => {
+    const { unmount } = render(<ContactForm />);
+    expect(countryButton()).toHaveTextContent("+971");
+    unmount();
+
+    vi.restoreAllMocks();
+    mockTimeZone("Asia/Kolkata");
+    render(<ContactForm />);
+    expect(countryButton()).toHaveTextContent("+91");
+  });
+
+  it("lists priority countries first and lets you search and pick with the keyboard", async () => {
+    const user = userEvent.setup();
+    render(<ContactForm />);
+
+    countryButton().focus();
+    await user.keyboard("{ArrowDown}");
+    const search = screen.getByRole("combobox", { name: "Search countries" });
+    expect(search).toHaveFocus();
+
+    // Accessible names are "<country> <dial code>"; the flags are decorative.
+    const options = screen.getAllByRole("option");
+    expect(options[0]).toHaveAccessibleName("United Arab Emirates +971");
+    const names = options.map((o) => o.querySelector(".cs__name")?.textContent);
+    expect(names.slice(0, 9)).toEqual([
+      "United Arab Emirates",
+      "India",
+      "Saudi Arabia",
+      "Qatar",
+      "Oman",
+      "Kuwait",
+      "Bahrain",
+      "United States",
+      "United Kingdom",
+    ]);
+    expect(screen.getByRole("option", { name: /United Arab Emirates/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+
+    await user.type(search, "saudi");
+    expect(screen.getAllByRole("option")).toHaveLength(1);
+    await user.keyboard("{Enter}");
+
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    expect(countryButton()).toHaveTextContent("+966");
+    expect(countryButton()).toHaveFocus();
+  });
+
+  it("toggles service chips with Enter and Space without submitting", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    render(<ContactForm />);
+    const chip = screen.getByRole("checkbox", { name: "AI Growth" });
+
+    chip.focus();
+    await user.keyboard("{Enter}");
+    expect(chip).toBeChecked();
+    await user.keyboard(" ");
+    expect(chip).not.toBeChecked();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("disables the button while sending and ignores double submits", async () => {
@@ -122,7 +265,7 @@ describe("ContactForm Component", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     resolve({ json: async () => ({ ok: true }) });
-    expect(await screen.findByText(/Thank you!/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Thank you, Jane!/i)).toBeInTheDocument();
   });
 
   it("shows an error and keeps the input when the script returns ok:false", async () => {

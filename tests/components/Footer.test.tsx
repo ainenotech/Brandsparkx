@@ -58,8 +58,9 @@ describe("Footer Component", () => {
     const { container } = render(<Footer />);
 
     for (const office of site.offices) {
-      const name = office.city.split(",")[0];
-      const link = screen.getByRole("link", { name: `Open ${name} office in Google Maps` });
+      const link = screen.getByRole("link", {
+        name: `Open ${office.city} office in Google Maps`,
+      });
       expect(link).toHaveTextContent(office.city);
       expect(link).toHaveAttribute(
         "href",
