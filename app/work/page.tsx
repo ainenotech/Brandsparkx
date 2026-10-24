@@ -7,12 +7,7 @@ import { cases } from "@/content/cases";
 import { visible } from "@/lib/placeholders";
 import { pageMetadata } from "@/lib/seo";
 
-export const metadata = pageMetadata({
-  title: "Work & Case Studies | BrandSparkX",
-  description:
-    "How BrandSparkX applies AI, automation and intelligent systems to real business problems — each case study covers the challenge, the solution and the impact.",
-  path: "/work",
-});
+export const metadata = pageMetadata("work");
 
 // Bar heights and delays for the decorative dashboard (sample data, as in the original).
 const kpis = [
@@ -23,7 +18,6 @@ const kpis = [
 
 export default function WorkPage() {
   const items = visible(cases);
-  const hasDemos = items.some((c) => !c.published);
 
   return (
     <div className="page on">
@@ -34,8 +28,8 @@ export default function WorkPage() {
             <h1>AI applied to real business problems.</h1>
             <p className="lede">
               Explore how AI, automation and intelligent systems can create measurable business
-              impact. Every case study follows the same shape: the challenge, the solution, the
-              impact.
+              impact. Each example use case follows the same shape: the challenge, then the
+              solution.
             </p>
           </div>
           <div className="pvis" aria-hidden="true">
@@ -100,18 +94,10 @@ export default function WorkPage() {
       </div>
 
       <div className="wrap">
-        {hasDemos && (
-          <div className="note" style={{ marginTop: 40 }}>
-            <Icon name="i-info" />
-            The projects below are demonstration layouts. Replace them with verified case studies
-            and approved client results before launch.
-          </div>
-        )}
         {items.map((c) => (
           <article className="cs-full rv" key={c.title}>
             <div className="case-img" style={{ position: "relative" }}>
               <CaseArt variant={c.art} />
-              {!c.published && <span className="demo-badge">Demonstration project</span>}
             </div>
             <div>
               <div className="kicker" style={{ marginBottom: 14 }}>
@@ -127,18 +113,14 @@ export default function WorkPage() {
                   <b>The solution</b>
                   <span>{c.solution}</span>
                 </div>
-                <div>
-                  <b>The impact</b>
-                  <span>{c.impact ?? "Add verified outcomes once approved by the client."}</span>
-                </div>
+                {/* Impact appears only once a client has approved verified results. */}
+                {c.impact && (
+                  <div>
+                    <b>The impact</b>
+                    <span>{c.impact}</span>
+                  </div>
+                )}
               </div>
-              {!c.impact && (
-                <div className="metrics">
-                  {c.metrics.map((m) => (
-                    <span key={m}>{m}: to be verified</span>
-                  ))}
-                </div>
-              )}
             </div>
           </article>
         ))}

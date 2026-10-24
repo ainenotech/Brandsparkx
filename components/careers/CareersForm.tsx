@@ -14,7 +14,7 @@ import { useEffect, useRef, useState, type FocusEvent, type FormEvent } from "re
 import { APPLY_EVENT } from "@/components/careers/CareerBoard";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 import { IconField } from "@/components/forms/IconField";
-import { PhoneField } from "@/components/forms/PhoneField";
+import { LazyPhoneField as PhoneField } from "@/components/forms/LazyPhoneField";
 import { Icon } from "@/components/Icon";
 import { careerLocations, careerPositions } from "@/content/careers";
 import { postToScript } from "@/lib/postToScript";

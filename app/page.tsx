@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
+import { FaqSection } from "@/components/FaqSection";
+import { JsonLd } from "@/components/JsonLd";
 import { FinalCta } from "@/components/FinalCta";
 import { FlowSection } from "@/components/flow/FlowSection";
 import { LinearFlow } from "@/components/flow/LinearFlow";
@@ -10,19 +12,15 @@ import { HeroWalkthrough } from "@/components/home/HeroWalkthrough";
 import { TeamGrid } from "@/components/home/TeamGrid";
 import { Testimonials } from "@/components/home/Testimonials";
 import { cases } from "@/content/cases";
+import { faqs } from "@/content/faqs";
 import { clientLogos } from "@/content/clients";
-import { SHOW_PLACEHOLDER_CONTENT, site } from "@/content/site";
+import { SHOW_PLACEHOLDER_CONTENT, SHOW_TESTIMONIALS, site } from "@/content/site";
 import { team } from "@/content/team";
 import { testimonials } from "@/content/testimonials";
-import { pageMetadata } from "@/lib/seo";
+import { leadershipJsonLd, pageMetadata } from "@/lib/seo";
 import { visible } from "@/lib/placeholders";
 
-export const metadata = pageMetadata({
-  title: "BrandSparkX | AI Growth & Automation Company in Dubai, UAE",
-  description:
-    "BrandSparkX is an AI growth and automation company in Dubai: AI voice agents, AI sales and marketing, business automation and AI engineers on demand.",
-  path: "/",
-});
+export const metadata = pageMetadata("home");
 
 const smallCards = [
   {
@@ -81,6 +79,9 @@ export default function HomePage() {
 
   return (
     <div className="page on">
+      {leadershipJsonLd(members).map((person) => (
+        <JsonLd key={person["@id"]} data={person} />
+      ))}
       <section className="hero">
         <div className="wrap hero-grid">
           <div>
@@ -100,8 +101,7 @@ export default function HomePage() {
               </span>
             </h1>
             <p className="lede fade" style={{ animationDelay: ".55s" }}>
-              Turn AI into a practical growth engine for your business — from strategy and sales to
-              automation, engineering and intelligent customer experiences.
+              {site.description}
             </p>
             <div className="hero-ctas fade" style={{ animationDelay: ".7s" }}>
               <Link href="/solutions" className="btn btn-red">
@@ -164,7 +164,12 @@ export default function HomePage() {
                           ))
                         : clientLogos.map((c) => (
                             <div className="trust-logo" key={c.name}>
-                              <Image src={c.logo} alt={c.name} width={c.width} height={c.height} />
+                              <Image
+                                src={c.logo}
+                                alt={`${c.name} logo`}
+                                width={c.width}
+                                height={c.height}
+                              />
                             </div>
                           ))}
                     </div>
@@ -355,8 +360,8 @@ export default function HomePage() {
           <div className="wrap">
             <div className="sec-head rv">
               <div>
-                <div className="kicker">Stories of success</div>
-                <h2>Real problems. Practical AI.</h2>
+                <div className="kicker">Practical AI</div>
+                <h2>Example use cases</h2>
               </div>
               <p className="lede">
                 Explore how intelligent technology can create meaningful business impact.
@@ -365,14 +370,15 @@ export default function HomePage() {
             <CaseCards items={caseItems} />
             <div style={{ marginTop: 40 }} className="rv">
               <Link href="/work" className="link">
-                See all work <Icon name="i-arrow" width={16} height={16} />
+                See how it works <Icon name="i-arrow" width={16} height={16} />
               </Link>
             </div>
           </div>
         </section>
       )}
 
-      {quotes.length > 0 && (
+      {/* Hidden until real testimonials exist (see SHOW_TESTIMONIALS in content/site.ts). */}
+      {SHOW_TESTIMONIALS && quotes.length > 0 && (
         <section id="testimonials">
           <div className="wrap testi">
             <div className="rv">
@@ -388,6 +394,8 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      <FaqSection items={faqs.home} />
 
       <FinalCta
         title="Ready to build with AI?"

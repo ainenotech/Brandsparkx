@@ -2,15 +2,12 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Icon } from "@/components/Icon";
 import { JsonLd } from "@/components/JsonLd";
 import { ContactForm } from "@/components/contact/ContactForm";
+import { FaqSection } from "@/components/FaqSection";
+import { faqs } from "@/content/faqs";
 import { site } from "@/content/site";
 import { officesJsonLd, pageMetadata } from "@/lib/seo";
 
-export const metadata = pageMetadata({
-  title: "Contact | BrandSparkX",
-  description:
-    "Talk to BrandSparkX about AI automation, AI voice agents or AI engineers. Offices in Business Bay, Dubai and Bengaluru. Call or WhatsApp +971 55 996 3778.",
-  path: "/contact",
-});
+export const metadata = pageMetadata("contact");
 
 const trustPoints = ["Free strategy call", "No commitment", "Your data stays private"];
 const officeId = (locality: string) => `office-${locality.toLowerCase()}`;
@@ -133,6 +130,18 @@ export default function ContactPage() {
                   <h3>{office.city}</h3>
                 </div>
                 <p>{office.address}</p>
+                {office.hours.length > 0 && (
+                  <ul className="contact-office-hours" aria-label={`${office.city} business hours`}>
+                    {office.hours.map((h) => (
+                      <li key={h.days.join()}>
+                        {h.days.length > 1
+                          ? `${h.days[0]}–${h.days[h.days.length - 1]}`
+                          : h.days[0]}
+                        : {h.opens}–{h.closes}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(office.address)}`}
                   target="_blank"
@@ -151,6 +160,8 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      <FaqSection items={faqs.contact} />
     </div>
   );
 }

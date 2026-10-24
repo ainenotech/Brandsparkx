@@ -22,7 +22,7 @@ Requires Node.js 20.9 or newer.
 
 ```bash
 npm install
-cp .env.example .env.local   # set NEXT_PUBLIC_SITE_URL to the live domain
+cp .env.example .env.local   # add the contact form script URL
 npm run dev                  # http://localhost:3000
 ```
 
@@ -98,11 +98,12 @@ from these files, so a change in one place updates the whole site.
 - Per-page title, description, canonical URL, Open Graph and Twitter card (`lib/seo.ts`).
 - Structured data: Organization, WebSite, ProfessionalService (Dubai + Bengaluru offices),
   Service (each solution) and BreadcrumbList.
-- `sitemap.xml`, `robots.txt`, favicon, Apple touch icon, 1200×630 share image (`public/og.png`).
+- `sitemap.xml`, `robots.txt`, favicon, Apple touch icon, a generated 1200×630 share image per page
+  (`app/og/[key]`), titles and descriptions for every page in `content/seo.ts`.
 - One `<h1>` per page.
 
-Set `NEXT_PUBLIC_SITE_URL` to the real domain before deploying — canonical URLs, the sitemap and
-structured data all use it.
+The canonical origin is fixed to `https://www.brandsparkx.com` (`SITE_URL` in `content/site.ts`) —
+canonical URLs, Open Graph, the sitemap and structured data all use it.
 
 ## Phase 2 integration points
 

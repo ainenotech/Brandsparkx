@@ -4,18 +4,21 @@ import { FlowSection } from "@/components/flow/FlowSection";
 import { FinalCta } from "@/components/FinalCta";
 import { Icon, type IconName } from "@/components/Icon";
 import { JsonLd } from "@/components/JsonLd";
-import { contactHref } from "@/content/solutions";
+import { FaqSection } from "@/components/FaqSection";
+import { ComparisonTable } from "@/components/solutions/ComparisonTable";
+import { SolutionDetails } from "@/components/solutions/SolutionDetails";
+import { SolutionDefinition } from "@/components/solutions/SolutionDefinition";
+import { comparisons } from "@/content/comparisons";
+import { faqs } from "@/content/faqs";
+import { RelatedSolutions } from "@/components/solutions/RelatedSolutions";
+import { contactHref, solutions } from "@/content/solutions";
 import { pageMetadata, serviceJsonLd } from "@/lib/seo";
 
 const PATH = "/ai-voice-calling";
 const DESCRIPTION =
   "AI voice agents in Dubai that answer inbound calls, run outbound calling, qualify leads and book appointments 24/7 — without growing your headcount.";
 
-export const metadata = pageMetadata({
-  title: "AI Voice Agents & AI Calling Solutions | BrandSparkX Dubai",
-  description: DESCRIPTION,
-  path: PATH,
-});
+export const metadata = pageMetadata("ai-voice-calling");
 
 // 40 bars; staggered delays and five repeating durations, as in the original.
 const bars = Array.from({ length: 40 }, (_, i) => ({
@@ -80,6 +83,7 @@ const builtFor = [
 const voiceContact = contactHref("AI Voice & Calling");
 
 export default function VoicePage() {
+  const solution = solutions.find((x) => x.slug === "ai-voice-calling")!;
   return (
     <div className="page on">
       <JsonLd data={serviceJsonLd("AI Voice & Calling", DESCRIPTION, PATH)} />
@@ -130,6 +134,12 @@ export default function VoicePage() {
         </div>
       </div>
 
+      <SolutionDefinition
+        pageKey="ai-voice-calling"
+        question={solution.definitionQuestion}
+        definition={solution.definition}
+      />
+
       <FlowSection id="voice" />
 
       <section>
@@ -170,6 +180,14 @@ export default function VoicePage() {
           </div>
         </div>
       </section>
+
+      <SolutionDetails slug="ai-voice-calling" firstSoft={false} />
+
+      <ComparisonTable data={comparisons["ai-voice-calling"]} />
+
+      <FaqSection items={faqs["ai-voice-calling"]} soft />
+
+      <RelatedSolutions slug="ai-voice-calling" />
 
       <FinalCta compactTop title="Your next customer conversation could be AI-powered.">
         <Link href={voiceContact} className="btn btn-red">

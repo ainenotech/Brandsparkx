@@ -6,6 +6,11 @@ export type TeamMember = {
   /** Path under /public, e.g. "/team/krishna.webp". Leave empty until a photo is approved. */
   photo?: string;
   email?: string;
+  /**
+   * Public LinkedIn profile URL. TODO(team): add for each member (shown as a LinkedIn link on
+   * the team cards and used as sameAs in their Person structured data).
+   */
+  linkedin?: string;
   phoneHref?: string;
   lead?: boolean;
   published: boolean;
@@ -32,6 +37,7 @@ export const team: TeamMember[] = [
     published: true,
   },
   {
+    // TODO(team): add Ratnesh's surname (and Scott's below) so all names are shown the same way.
     name: "Ratnesh",
     initials: "R",
     role: "Strategic Partner · Growth & Marketing",
@@ -40,6 +46,7 @@ export const team: TeamMember[] = [
     published: true,
   },
   {
+    // TODO(team): surname missing (see Ratnesh above).
     name: "Scott",
     initials: "S",
     role: "Head of Paid Media",

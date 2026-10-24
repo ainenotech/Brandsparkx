@@ -25,16 +25,20 @@ const inter = Inter({
   display: "swap",
   variable: "--font-inter",
 });
+// Decorative fonts (small mono labels, script kickers) are not preloaded, so they don't compete
+// with the body and heading fonts for bandwidth on first paint; they still swap in when used.
 const mono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
   display: "swap",
+  preload: false,
   variable: "--font-jetbrains-mono",
 });
 const script = Italianno({
   subsets: ["latin"],
   weight: "400",
   display: "swap",
+  preload: false,
   variable: "--font-italianno",
 });
 

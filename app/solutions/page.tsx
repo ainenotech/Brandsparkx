@@ -6,12 +6,7 @@ import { SolutionsHub } from "@/components/solutions/SolutionsHub";
 import { solutionHref, solutions } from "@/content/solutions";
 import { pageMetadata } from "@/lib/seo";
 
-export const metadata = pageMetadata({
-  title: "AI Solutions & Automation Services | BrandSparkX Dubai",
-  description:
-    "Seven connected AI solutions for UAE businesses: AI growth, content, marketing, sales, business automation, AI engineers on demand and AI voice agents.",
-  path: "/solutions",
-});
+export const metadata = pageMetadata("solutions");
 
 const services: { href: string; title: string; text: string; icon: IconName }[] = [
   {

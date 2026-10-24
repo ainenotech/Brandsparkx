@@ -87,7 +87,7 @@ export function Header() {
           }}
         >
           <Link href="/" className="logo" aria-label="BrandSparkX home">
-            <Image src="/brand/brand-logo.webp" alt="BrandSparkX" width={201} height={28} priority style={{ width: 'auto', height: 'auto' }} />
+            <Image src="/brand/brand-logo.webp" alt="BrandSparkX" width={201} height={28} loading="eager" fetchPriority="high" style={{ width: 'auto', height: 'auto' }} />
           </Link>
           <nav className="nav" aria-label="Primary">
             {renderNavigationLinks()}

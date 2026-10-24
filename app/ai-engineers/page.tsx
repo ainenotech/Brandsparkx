@@ -3,20 +3,23 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { FinalCta } from "@/components/FinalCta";
 import { Icon } from "@/components/Icon";
 import { JsonLd } from "@/components/JsonLd";
+import { FaqSection } from "@/components/FaqSection";
+import { ComparisonTable } from "@/components/solutions/ComparisonTable";
+import { SolutionDetails } from "@/components/solutions/SolutionDetails";
+import { SolutionDefinition } from "@/components/solutions/SolutionDefinition";
+import { comparisons } from "@/content/comparisons";
+import { faqs } from "@/content/faqs";
+import { RelatedSolutions } from "@/components/solutions/RelatedSolutions";
 import { CodeEditorDemo } from "@/components/engineers/CodeEditorDemo";
 import { EngagementModels } from "@/components/engineers/EngagementModels";
-import { contactHref } from "@/content/solutions";
+import { contactHref, solutions } from "@/content/solutions";
 import { pageMetadata, serviceJsonLd } from "@/lib/seo";
 
 const PATH = "/ai-engineers";
 const DESCRIPTION =
   "Hire AI engineers on demand by project, week or month. Agentic AI, full-stack, backend, cloud and application support with one point of contact.";
 
-export const metadata = pageMetadata({
-  title: "AI Engineers on Demand | AI Development Talent | BrandSparkX",
-  description: DESCRIPTION,
-  path: PATH,
-});
+export const metadata = pageMetadata("ai-engineers");
 
 const stack = [
   ["ai.engineering", "AI Engineering"],
@@ -32,6 +35,7 @@ const stack = [
 const engineersContact = contactHref("AI Engineers");
 
 export default function EngineersPage() {
+  const solution = solutions.find((x) => x.slug === "ai-engineers")!;
   return (
     <div className="page on">
       <JsonLd data={serviceJsonLd("AI Engineers on Demand", DESCRIPTION, PATH)} />
@@ -78,6 +82,12 @@ export default function EngineersPage() {
         </div>
       </div>
 
+      <SolutionDefinition
+        pageKey="ai-engineers"
+        question={solution.definitionQuestion}
+        definition={solution.definition}
+      />
+
       <section>
         <div className="wrap">
           <div className="sec-head rv">
@@ -111,6 +121,14 @@ export default function EngineersPage() {
           </div>
         </div>
       </section>
+
+      <SolutionDetails slug="ai-engineers" />
+
+      <ComparisonTable data={comparisons["ai-engineers"]} />
+
+      <FaqSection items={faqs["ai-engineers"]} soft />
+
+      <RelatedSolutions slug="ai-engineers" />
 
       <FinalCta title="Need AI talent now?" text="Tell us what you're building.">
         <Link href={engineersContact} className="btn btn-red">

@@ -3,7 +3,7 @@ import { CaseArt } from "@/components/CaseArt";
 import { Icon } from "@/components/Icon";
 import type { CaseStudy } from "@/content/cases";
 
-/** Case-study cards on the home page. Each card links to the Work page. */
+/** Use-case cards on the home page. Each card links to the Work page. */
 export function CaseCards({ items }: { items: CaseStudy[] }) {
   return (
     <div className="cases">
@@ -22,7 +22,6 @@ export function CaseCards({ items }: { items: CaseStudy[] }) {
             .join(" ")}
         >
           <div className="case-img">
-            {!c.published && <span className="demo-badge">Demonstration project</span>}
             <CaseArt variant={c.art} />
           </div>
           <div className="case-body">
@@ -33,13 +32,16 @@ export function CaseCards({ items }: { items: CaseStudy[] }) {
               <dd>{c.challenge}</dd>
               <dt>Solution</dt>
               <dd>{c.solution}</dd>
-              <dt>Impact</dt>
-              <dd style={c.impact ? undefined : { color: "var(--text2)" }}>
-                {c.impact ?? "Verified results to be added"}
-              </dd>
+              {/* Impact appears only once a client has approved verified results. */}
+              {c.impact && (
+                <>
+                  <dt>Impact</dt>
+                  <dd>{c.impact}</dd>
+                </>
+              )}
             </dl>
             <span className="link">
-              Read case study <Icon name="i-arrow" width={16} height={16} />
+              Learn more <Icon name="i-arrow" width={16} height={16} />
             </span>
           </div>
         </Link>

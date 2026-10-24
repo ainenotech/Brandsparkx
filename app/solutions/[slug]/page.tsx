@@ -5,9 +5,14 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { FinalCta } from "@/components/FinalCta";
 import { Icon } from "@/components/Icon";
 import { JsonLd } from "@/components/JsonLd";
+import { FaqSection } from "@/components/FaqSection";
+import { SolutionDetails } from "@/components/solutions/SolutionDetails";
+import { SolutionDefinition } from "@/components/solutions/SolutionDefinition";
+import { faqs, type FaqPage } from "@/content/faqs";
 import { FlowSection } from "@/components/flow/FlowSection";
-import { LinearFlow } from "@/components/flow/LinearFlow";
-import { contactHref, solutionHref, solutions } from "@/content/solutions";
+import type { PageKey } from "@/content/seo";
+import { RelatedSolutions } from "@/components/solutions/RelatedSolutions";
+import { contactHref, solutions } from "@/content/solutions";
 import { pageMetadata, serviceJsonLd } from "@/lib/seo";
 
 // Solutions with their own dedicated page (AI Voice, AI Engineers) are redirected in next.config.ts.
@@ -25,11 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const s = detailSolutions.find((item) => item.slug === slug);
   if (!s) return {};
-  return pageMetadata({
-    title: s.seoTitle,
-    description: s.seoDescription,
-    path: `/solutions/${s.slug}`,
-  });
+  return pageMetadata(s.slug as PageKey);
 }
 
 export default async function SolutionPage({ params }: Props) {
@@ -38,7 +39,6 @@ export default async function SolutionPage({ params }: Props) {
   if (!s) notFound();
 
   const path = `/solutions/${s.slug}`;
-  const others = solutions.filter((item) => item.slug !== s.slug);
 
   return (
     <div className="page on">
@@ -66,41 +66,19 @@ export default async function SolutionPage({ params }: Props) {
         </div>
       </div>
 
+      <SolutionDefinition
+        pageKey={s.slug as PageKey}
+        question={s.definitionQuestion}
+        definition={s.definition}
+      />
+
       <FlowSection id={s.slug} />
 
-      <section>
-        <div className="wrap">
-          <div className="sec-head rv">
-            <div>
-              <div className="kicker">How we work</div>
-              <h2>From idea to intelligent execution.</h2>
-            </div>
-            <p className="lede">
-              Five stages, one direction. Start small, prove value, then scale what works.
-            </p>
-          </div>
-          <LinearFlow />
-        </div>
-      </section>
+      <SolutionDetails slug={s.slug} />
 
-      <section style={{ background: "var(--soft)" }}>
-        <div className="wrap">
-          <div className="sec-head rv">
-            <div>
-              <div className="kicker">Our solutions</div>
-              <h2>Each capability works on its own.</h2>
-            </div>
-            <p className="lede">Together they form one connected growth system.</p>
-          </div>
-          <nav className="jump rv" aria-label="Other solutions">
-            {others.map((o) => (
-              <Link key={o.slug} href={solutionHref(o)}>
-                {o.title}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </section>
+      <FaqSection items={faqs[s.slug as FaqPage]} />
+
+      <RelatedSolutions slug={s.slug} />
 
       <FinalCta
         title="Start with one problem."
