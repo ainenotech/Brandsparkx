@@ -17,7 +17,7 @@ import {
 } from "react";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 import { IconField } from "@/components/forms/IconField";
-import { PhoneField } from "@/components/forms/PhoneField";
+import { LazyPhoneField as PhoneField } from "@/components/forms/LazyPhoneField";
 import { Icon } from "@/components/Icon";
 import { interests } from "@/content/interests";
 import { postToScript } from "@/lib/postToScript";

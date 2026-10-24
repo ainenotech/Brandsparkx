@@ -143,7 +143,8 @@ export function Header() {
               alt="BrandSparkX"
               width={201}
               height={28}
-              priority
+              loading="eager"
+              fetchPriority="high"
               style={{ width: "auto", height: "auto" }}
             />
           </Link>

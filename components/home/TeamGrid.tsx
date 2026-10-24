@@ -39,12 +39,23 @@ export function TeamGrid({ members }: { members: TeamMember[] }) {
               <div className="role">{m.role}</div>
               <h3>{m.name}</h3>
               <p>{m.bio}</p>
-              {(m.email || m.phoneHref) && (
+              {(m.email || m.phoneHref || m.linkedin) && (
                 <div className="member-links">
                   {m.email && (
                     <a href={`mailto:${m.email}`} aria-label={`Email ${m.name}`}>
                       <Icon name="i-mail" />
                       Email
+                    </a>
+                  )}
+                  {m.linkedin && (
+                    <a
+                      href={m.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${m.name} on LinkedIn`}
+                    >
+                      <Icon name="i-in" />
+                      LinkedIn
                     </a>
                   )}
                   {m.phoneHref && (

@@ -74,7 +74,7 @@ export function EntranceIntro() {
           alt=""
           width={240}
           height={189}
-          priority
+          loading="eager"
           unoptimized
         />
       </span>
@@ -85,7 +85,7 @@ export function EntranceIntro() {
             alt=""
             width={820}
             height={75}
-            priority
+            loading="eager"
             unoptimized
             sizes="(max-width: 558px) 72vw, 406px"
             onError={finishIntro}
@@ -97,7 +97,7 @@ export function EntranceIntro() {
             alt=""
             width={240}
             height={189}
-            priority
+            loading="eager"
             unoptimized
             sizes="(max-width: 558px) 15vw, 84px"
             onError={finishIntro}

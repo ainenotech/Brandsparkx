@@ -3,17 +3,22 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CareerBoard } from "@/components/careers/CareerBoard";
 import { CareersForm } from "@/components/careers/CareersForm";
 import { Icon } from "@/components/Icon";
+import { FaqSection } from "@/components/FaqSection";
 import { careerCategories, careerPage } from "@/content/careers";
+import { faqs } from "@/content/faqs";
 import { site } from "@/content/site";
 import { pageMetadata } from "@/lib/seo";
 
-export const metadata = pageMetadata({
-  title: "Careers | BrandSparkX",
-  description:
-    "Careers at BrandSparkX in Dubai and Bengaluru. Explore AI, marketing, sales, and technology teams, and apply online with your CV.",
-  path: "/careers",
-});
+export const metadata = pageMetadata("careers");
 
+/*
+ * TODO(schema): no JobPosting structured data yet, on purpose: the page lists hiring areas, not
+ * individual openings, and Google only accepts JobPosting for a real, open position (one per
+ * job page). When roles are approved, publish one page per opening with JobPosting containing:
+ * title, description (HTML), datePosted, validThrough, employmentType, hiringOrganization
+ * (@id ${SITE_URL}/#organization), jobLocation (PostalAddress of the office) or
+ * jobLocationType "TELECOMMUTE" + applicantLocationRequirements, and baseSalary if disclosed.
+ */
 export default function CareersPage() {
   const { hero, opportunities, culture, process, apply } = careerPage;
 
@@ -110,6 +115,8 @@ export default function CareersPage() {
           </ol>
         </div>
       </section>
+
+      <FaqSection items={faqs.careers} />
 
       <section id="apply" className="kx-sec kx-apply" aria-labelledby="apply-title">
         <div className="wrap kx-apply__grid">
