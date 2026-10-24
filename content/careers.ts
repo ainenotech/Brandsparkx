@@ -3,32 +3,41 @@
  * The page renders this data; individual openings are not listed here.
  */
 
+import type { IconName } from "@/components/Icon";
+
 export const careerCategories = [
   {
     title: "AI & Automation",
+    icon: "i-auto",
     roles:
       "AI engineers, automation specialists, AI agent developers, workflow automation experts.",
     tags: "Engineering · Product · Innovation",
   },
   {
     title: "Creative & Digital Marketing",
+    icon: "i-mkt",
     roles:
       "Content strategists, graphic designers, video editors, performance marketers, SEO specialists.",
     tags: "Creative · Content · Growth",
   },
   {
     title: "Sales & Business Development",
+    icon: "i-sales",
     roles:
       "Business development executives, sales professionals, lead generation specialists, client relationship managers.",
     tags: "Revenue · Partnerships · Client Success",
   },
   {
-    title: "Technology & Product",
+    title: "Business Development Executive (BDE)",
+    icon: "i-growth",
     roles:
-      "Web developers, UI/UX designers, software testers, project managers, product specialists.",
-    tags: "Development · Design · Delivery",
+      "Find and qualify new leads, run outreach and discovery calls, and turn prospects into long-term clients.",
+    tags: "Lead Generation · Outreach · Client Acquisition",
   },
-] as const;
+] as const satisfies readonly { title: string; icon: IconName; roles: string; tags: string }[];
+
+/** Position choices in the application form: every team, plus "Other" (free text). */
+export const careerPositions = [...careerCategories.map((c) => c.title), "Other"] as const;
 
 export const careerLocations = ["Dubai, UAE", "Bengaluru, India", "Remote / Flexible"] as const;
 
@@ -39,14 +48,18 @@ export const careerPage = {
     intro:
       "Join the people shaping the future of AI, automation, technology, and digital growth. At BrandSparkX, we turn bold ideas into intelligent solutions that help businesses move forward.",
     places: "Dubai · Bengaluru · Opportunities across teams",
-  },
-  chapter: {
-    title: "Your next chapter starts here.",
-    text: "We're looking for curious minds, creative thinkers, problem-solvers, and ambitious people who want to do meaningful work. Whether you build technology, create campaigns, automate workflows, or drive business growth, there's room to make an impact.",
+    // Stat cards beside the hero on desktop. Keep these factual.
+    highlights: [
+      { icon: "i-pin", value: "2 hubs", label: "Dubai & Bengaluru" },
+      { icon: "i-users", value: "4 teams", label: "Hiring across AI, marketing, sales & BD" },
+      { icon: "i-spark", value: "AI-first", label: "Modern AI tools in everyday work" },
+      { icon: "i-check", value: "5 steps", label: "A clear, simple hiring process" },
+    ] as const satisfies readonly { icon: IconName; value: string; label: string }[],
   },
   opportunities: {
     title: "Find your place at BrandSparkX",
-    note: "Suggested hiring categories. Publish individual openings when the roles are approved.",
+    intro:
+      "We're looking for curious minds, creative thinkers, problem-solvers, and ambitious people who want to do meaningful work. Whether you build technology, create campaigns, automate workflows, or drive business growth, there's room to make an impact.",
   },
   culture: {
     title: "Think boldly. Build intelligently. Grow together.",
@@ -70,6 +83,30 @@ export const careerPage = {
         text: "Share knowledge, respect different perspectives, and celebrate collective progress.",
       },
     ],
+    // TODO(careers): review this "Why BrandSparkX" copy. Keep claims general: no specific
+    // salary, benefits or perks that haven't been confirmed.
+    perks: [
+      {
+        icon: "i-spark",
+        title: "Work with AI daily",
+        text: "Use modern AI tools on real client work.",
+      },
+      {
+        icon: "i-growth",
+        title: "Learn and grow fast",
+        text: "Pick up new skills across AI, marketing and technology.",
+      },
+      {
+        icon: "i-check",
+        title: "Real ownership",
+        text: "Own your work from first idea to outcome.",
+      },
+      {
+        icon: "i-pin",
+        title: "Dubai & Bengaluru teams",
+        text: "Collaborate across our two hubs.",
+      },
+    ] as const satisfies readonly { icon: IconName; title: string; text: string }[],
   },
   process: {
     title: "How our hiring process works",
@@ -97,12 +134,11 @@ export const careerPage = {
     ],
   },
   apply: {
+    eyebrow: "Apply",
     title: "Let's build something meaningful.",
     intro:
-      "Have the skills, curiosity, and drive to make a difference? Tell us about yourself. If there isn't a suitable opening today, you can still express interest in future opportunities.",
-  },
-  closing: {
-    title: "Your talent. Our ambition. The future we build together.",
-    text: "Don't see the right role? We're always interested in connecting with people who bring fresh ideas, strong skills, and a builder's mindset.",
+      "Tell us about yourself. No role that fits yet? Apply anyway — we're always looking for builders.",
+    // Icons are set in app/careers/page.tsx (clock, file, pin, in this order).
+    points: ["Takes 2 minutes", "CV in PDF, DOC or DOCX", "Dubai · Bengaluru · Remote"],
   },
 } as const;

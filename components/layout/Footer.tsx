@@ -23,7 +23,6 @@ const footerSolutions = [
 // Footer shows office names only; each opens the full address (site.offices) in Google Maps.
 const mapsHref = (address: string) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-const officeName = (city: string) => city.split(",")[0];
 
 export function Footer() {
   return (
@@ -158,7 +157,8 @@ export function Footer() {
                 href={mapsHref(o.address)}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Open ${officeName(o.city)} office in Google Maps`}
+                // The label must contain the visible name (WCAG 2.5.3, label in name).
+                aria-label={`Open ${o.city} office in Google Maps`}
               >
                 <Icon name="i-pin" />
                 <span>{o.city}</span>

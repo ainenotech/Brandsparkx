@@ -5,64 +5,49 @@ import { CareerBoard } from "@/components/careers/CareerBoard";
 import { CareersForm } from "@/components/careers/CareersForm";
 import { careerCategories, careerPage } from "@/content/careers";
 
+const board = (
+  <CareerBoard
+    title={careerPage.opportunities.title}
+    intro={careerPage.opportunities.intro}
+    categories={careerCategories}
+  />
+);
+
 describe("CareerBoard", () => {
-  const count = (label: string) =>
-    screen.getByText((_, node) => {
-      if (!node?.classList.contains("job-board-count")) return false;
-      return (node.textContent ?? "").replace(/\s+/g, " ").trim() === label;
-    });
+  it("lists every team with its tags, location and an Apply link", () => {
+    render(board);
 
-  it("lists every team and filters by the search", async () => {
-    const user = userEvent.setup();
-    render(
-      <CareerBoard
-        title={careerPage.opportunities.title}
-        note={careerPage.opportunities.note}
-        categories={careerCategories}
-      />,
-    );
-
-    expect(screen.getByRole("heading", { name: "AI & Automation" })).toBeInTheDocument();
-    expect(count("Active 4 teams")).toBeInTheDocument();
-
-    await user.type(screen.getByRole("searchbox", { name: "Search by role" }), "seo");
-
-    expect(screen.getByRole("heading", { name: "Creative & Digital Marketing" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "AI & Automation" })).not.toBeInTheDocument();
-    expect(count("Active 1 team")).toBeInTheDocument();
+    for (const team of careerCategories) {
+      expect(screen.getByRole("heading", { name: team.title })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: `Apply for ${team.title}` })).toHaveAttribute(
+        "href",
+        "#apply",
+      );
+    }
+    expect(screen.getAllByText("Dubai · Bengaluru")).toHaveLength(careerCategories.length);
+    expect(screen.getByText("Engineering")).toBeInTheDocument();
   });
 
-  it("shows an empty state when nothing matches", async () => {
-    const user = userEvent.setup();
-    render(
-      <CareerBoard
-        title={careerPage.opportunities.title}
-        note={careerPage.opportunities.note}
-        categories={careerCategories}
-      />,
-    );
+  it("does not show the internal note, the search box or the team count", () => {
+    render(board);
 
-    await user.type(screen.getByRole("searchbox", { name: "Search by role" }), "zzzz");
-
-    expect(screen.getByText("No teams match that search.")).toBeInTheDocument();
-    expect(count("Active 0 teams")).toBeInTheDocument();
+    expect(screen.queryByText(/Publish individual openings/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Active/)).not.toBeInTheDocument();
   });
 
-  it("fills the application position from the team the user applies for", async () => {
+  it("pre-fills Position from the team the user applies for and focuses Name", async () => {
     const user = userEvent.setup();
     render(
       <>
-        <CareerBoard
-          title={careerPage.opportunities.title}
-          note={careerPage.opportunities.note}
-          categories={careerCategories}
-        />
+        {board}
         <CareersForm />
       </>,
     );
 
-    await user.click(screen.getByRole("link", { name: "Apply for AI & Automation" }));
+    await user.click(screen.getByRole("link", { name: "Apply for Sales & Business Development" }));
 
-    expect(screen.getByLabelText(/^Position/i)).toHaveValue("AI & Automation");
+    expect(screen.getByLabelText(/^Position/i)).toHaveValue("Sales & Business Development");
+    expect(screen.getByLabelText(/^Name/i)).toHaveFocus();
   });
 });

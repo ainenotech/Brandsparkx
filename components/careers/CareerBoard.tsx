@@ -1,22 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { Icon } from "@/components/Icon";
+import type { MouseEvent } from "react";
+import { Icon, type IconName } from "@/components/Icon";
 
 type Category = {
   title: string;
+  icon: IconName;
   roles: string;
   tags: string;
 };
 
-const mark = "BrandSparkX";
+/** Fired by a team card's Apply button; CareersForm listens, pre-fills Position and scrolls in. */
+export const APPLY_EVENT = "careers:apply";
 
-function fillPosition(title: string) {
-  const field = document.getElementById("c-position");
-  if (!(field instanceof HTMLInputElement)) return;
-  field.value = title;
-  field.dispatchEvent(new Event("input", { bubbles: true }));
-}
+const mark = "BrandSparkX";
 
 function BoardTitle({ title }: { title: string }) {
   const at = title.indexOf(mark);
@@ -32,84 +29,59 @@ function BoardTitle({ title }: { title: string }) {
 
 export function CareerBoard({
   title,
-  note,
+  intro,
   categories,
 }: {
   title: string;
-  note: string;
+  intro: string;
   categories: readonly Category[];
 }) {
-  const [query, setQuery] = useState("");
-  const needle = query.trim().toLowerCase();
-  const visible = categories.filter((category) => {
-    if (!needle) return true;
-    return `${category.title} ${category.roles} ${category.tags}`.toLowerCase().includes(needle);
-  });
+  // The link still jumps to #apply without JavaScript; with it, the form handles the scroll.
+  const apply = (event: MouseEvent<HTMLAnchorElement>, team: string) => {
+    event.preventDefault();
+    window.dispatchEvent(new CustomEvent(APPLY_EVENT, { detail: team }));
+  };
 
   return (
-    <section id="opportunities">
+    <section id="opportunities" className="kx-sec">
       <div className="wrap">
-        <div className="job-board-head">
+        <div className="kx-head">
           <h2>
             <BoardTitle title={title} />
           </h2>
-          <p className="lede">{note}</p>
+          <p className="lede">{intro}</p>
         </div>
 
-        <div className="job-board-bar">
-          <label className="job-board-search">
-            <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16">
-              <circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" strokeWidth="1.8" />
-              <path
-                d="M16 16l4 4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
-            <span className="job-board-search-label">Search by role</span>
-            <input
-              type="search"
-              value={query}
-              placeholder="Search by role"
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </label>
-          <p className="job-board-count">
-            <span>Active</span> {visible.length} {visible.length === 1 ? "team" : "teams"}
-          </p>
-        </div>
-
-        {visible.length === 0 ? (
-          <p className="job-board-empty">No teams match that search.</p>
-        ) : (
-          <div className="job-board">
-            {visible.map((category) => (
-              <article key={category.title}>
-                <div className="job-board-meta">
-                  <span>{category.tags}</span>
-                  <span>Dubai · Bengaluru</span>
-                </div>
-                <h3>{category.title}</h3>
-                <p>{category.roles}</p>
-                <ul>
-                  {category.tags.split(" · ").map((chip) => (
-                    <li key={chip}>{chip}</li>
-                  ))}
-                </ul>
+        <div className="kx-teams">
+          {categories.map((category) => (
+            <article key={category.title} className="kx-team">
+              <span className="kx-team__icon" aria-hidden="true">
+                <Icon name={category.icon} />
+              </span>
+              <h3>{category.title}</h3>
+              <p>{category.roles}</p>
+              <ul aria-label="Focus areas">
+                {category.tags.split(" · ").map((chip) => (
+                  <li key={chip}>{chip}</li>
+                ))}
+              </ul>
+              <div className="kx-team__foot">
+                <span className="kx-team__place">
+                  <Icon name="i-pin" />
+                  Dubai · Bengaluru
+                </span>
                 <a
                   href="#apply"
                   className="btn btn-red"
                   aria-label={`Apply for ${category.title}`}
-                  onClick={() => fillPosition(category.title)}
+                  onClick={(event) => apply(event, category.title)}
                 >
                   Apply <Icon name="i-arrow" />
                 </a>
-              </article>
-            ))}
-          </div>
-        )}
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );

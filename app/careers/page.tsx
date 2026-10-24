@@ -1,8 +1,7 @@
-import Link from "next/link";
+import { ClockIcon, EnvelopeSimpleIcon, FileTextIcon, MapPinIcon } from "@phosphor-icons/react/ssr";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CareerBoard } from "@/components/careers/CareerBoard";
 import { CareersForm } from "@/components/careers/CareersForm";
-import { FinalCta } from "@/components/FinalCta";
 import { Icon } from "@/components/Icon";
 import { careerCategories, careerPage } from "@/content/careers";
 import { site } from "@/content/site";
@@ -11,89 +10,139 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata = pageMetadata({
   title: "Careers | BrandSparkX",
   description:
-    "Careers at BrandSparkX in Dubai and Bengaluru. Explore AI, marketing, sales, and technology teams, then prepare an application by email.",
+    "Careers at BrandSparkX in Dubai and Bengaluru. Explore AI, marketing, sales, and technology teams, and apply online with your CV.",
   path: "/careers",
 });
 
 export default function CareersPage() {
-  const { hero, chapter, opportunities, culture, process, apply, closing } = careerPage;
+  const { hero, opportunities, culture, process, apply } = careerPage;
 
   return (
     <div className="page on career-page">
-      <div className="phero">
+      <section className="kx-hero" aria-labelledby="careers-title">
         <div className="wrap">
           <Breadcrumbs items={[{ name: "Careers", path: "/careers" }]} />
-          <div className="kicker">{hero.kicker}</div>
-          <h1>{hero.title}</h1>
-          <p className="lede">{hero.intro}</p>
-          <Link href="#opportunities" className="btn btn-red">
-            Explore Opportunities <Icon name="i-arrow" />
-          </Link>
-          <p className="career-places">{hero.places}</p>
-        </div>
-      </div>
-
-      <section>
-        <div className="wrap">
-          <h2 className="rv">{chapter.title}</h2>
-          <p className="lede rv">{chapter.text}</p>
+          <div className="kx-hero__grid">
+            <div>
+              <div className="kicker">{hero.kicker}</div>
+              <h1 id="careers-title">{hero.title}</h1>
+              <p className="lede">{hero.intro}</p>
+              <div className="kx-hero__cta">
+                <a href="#opportunities" className="btn btn-red">
+                  Explore opportunities <Icon name="i-arrow" />
+                </a>
+                <p className="kx-places">
+                  <Icon name="i-pin" />
+                  {hero.places}
+                </p>
+              </div>
+            </div>
+            <ul className="kx-stats" aria-label="BrandSparkX at a glance">
+              {hero.highlights.map((h) => (
+                <li key={h.value}>
+                  <span className="kx-stats__icon" aria-hidden="true">
+                    <Icon name={h.icon} />
+                  </span>
+                  <strong>{h.value}</strong>
+                  <span>{h.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
       <CareerBoard
         title={opportunities.title}
-        note={opportunities.note}
+        intro={opportunities.intro}
         categories={careerCategories}
       />
 
-      <section style={{ background: "var(--soft)" }}>
-        <div className="wrap">
-          <h2 className="rv">{culture.title}</h2>
-          <p className="lede rv">{culture.intro}</p>
-          <div className="career-list rv">
-            {culture.values.map((value) => (
-              <article key={value.title}>
-                <h3>{value.title}</h3>
-                <p>{value.text}</p>
-              </article>
-            ))}
+      {/* Values and "Why BrandSparkX" share one section so they don't repeat each other. */}
+      <section className="kx-sec kx-why" aria-labelledby="why-title">
+        <div className="wrap kx-why__grid">
+          <div>
+            <h2 id="why-title">{culture.title}</h2>
+            <p className="lede">{culture.intro}</p>
+            <ul className="kx-values">
+              {culture.values.map((value) => (
+                <li key={value.title}>
+                  <h3>{value.title}</h3>
+                  <p>{value.text}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="kx-why__label">Why BrandSparkX</h3>
+            <ul className="kx-perks">
+              {culture.perks.map((perk) => (
+                <li key={perk.title}>
+                  <span className="kx-perks__icon" aria-hidden="true">
+                    <Icon name={perk.icon} />
+                  </span>
+                  <h4>{perk.title}</h4>
+                  <p>{perk.text}</p>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      <section>
+      <section className="kx-sec" aria-labelledby="process-title">
         <div className="wrap">
-          <h2 className="rv">{process.title}</h2>
-          <ol className="career-steps rv">
-            {process.steps.map((step) => (
+          <h2 id="process-title" className="kx-center">
+            {process.title}
+          </h2>
+          <ol className="kx-steps">
+            {process.steps.map((step, i) => (
               <li key={step.title}>
-                <h3>{step.title}</h3>
-                <p>{step.text}</p>
+                <span className="kx-steps__num" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </div>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      <section id="apply" className="career-apply">
-        <div className="wrap">
-          <h2 className="rv">{apply.title}</h2>
-          <p className="lede rv">{apply.intro}</p>
-          <CareersForm />
-          <p className="career-note">
-            Prefer email? Send your CV and the role you&apos;re applying for to{" "}
-            <a className="link" href={`mailto:${site.careers.email}`}>
-              {site.careers.email}
+      <section id="apply" className="kx-sec kx-apply" aria-labelledby="apply-title">
+        <div className="wrap kx-apply__grid">
+          <div className="kx-apply__intro">
+            <span className="contact-eyebrow">
+              <span />
+              {apply.eyebrow.toUpperCase()}
+            </span>
+            <h2 id="apply-title">{apply.title}</h2>
+            <p>{apply.intro}</p>
+            <ul className="kx-apply__points">
+              {apply.points.map((point, i) => {
+                const PointIcon = [ClockIcon, FileTextIcon, MapPinIcon][i];
+                return (
+                  <li key={point}>
+                    <PointIcon aria-hidden="true" />
+                    {point}
+                  </li>
+                );
+              })}
+            </ul>
+            <a className="kx-apply__email" href={`mailto:${site.careers.email}`}>
+              <EnvelopeSimpleIcon aria-hidden="true" />
+              <span>
+                Prefer email? <strong>{site.careers.email}</strong>
+              </span>
             </a>
-          </p>
+          </div>
+          <div className="cf-card">
+            <CareersForm />
+          </div>
         </div>
       </section>
-
-      <FinalCta title={closing.title} text={closing.text}>
-        <Link href="#apply" className="btn btn-red">
-          Apply <Icon name="i-arrow" />
-        </Link>
-      </FinalCta>
     </div>
   );
 }

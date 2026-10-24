@@ -3,16 +3,22 @@
  * Pure functions so the same rules can run on the server in Phase 2.
  */
 
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { careerLocations } from "@/content/careers";
 
-export const contactFields = ["name", "email", "phone", "website", "message"] as const;
+/** Optional full http(s) link (careers portfolio). */
+const httpLink = (v: string) => !v || /^https?:\/\/\S+\.\S+/.test(v);
+
+// Website is optional free text (e.g. "www.example.com"), so it is not validated.
+export const contactFields = ["name", "email", "phone", "message"] as const;
 export type ContactField = (typeof contactFields)[number];
 
 export const contactRules: Record<ContactField, (value: string) => boolean> = {
   name: (v) => v.trim().length > 1,
   email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v),
-  phone: (v) => !v || /^\+?[\d\s()-]{7,}$/.test(v),
-  website: (v) => !v || /^https?:\/\/\S+\.\S+/.test(v),
+  // Optional. The contact form holds the number in E.164 (e.g. "+971501234567"); it must be
+  // a real number for its country.
+  phone: (v) => !v || isValidPhoneNumber(v),
   message: (v) => v.trim().length >= 10,
 };
 
@@ -46,18 +52,25 @@ export const careerFields = [
 export type CareerField = (typeof careerFields)[number];
 
 /** Required fields are validated on blur even when left empty. */
-export const careerRequiredFields: CareerField[] = ["name", "email", "position"];
+export const careerRequiredFields: CareerField[] = [
+  "name",
+  "email",
+  "position",
+  "experience",
+  "location",
+];
 
 const isAllowed = (options: readonly string[], value: string) => options.includes(value.trim());
 
 export const careerRules: Record<CareerField, (value: string) => boolean> = {
   name: contactRules.name,
   email: contactRules.email,
+  // Same country-aware E.164 check as the contact form.
   phone: contactRules.phone,
   position: (value) => value.trim().length > 1,
-  experience: () => true,
-  location: (value) => !value.trim() || isAllowed(careerLocations, value),
-  portfolio: contactRules.website,
+  experience: (value) => value.trim().length > 0,
+  location: (value) => isAllowed(careerLocations, value),
+  portfolio: httpLink,
   message: () => true,
 };
 

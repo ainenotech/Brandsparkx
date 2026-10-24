@@ -29,9 +29,9 @@ test.describe("Contact Form E2E", () => {
     const submitBtn = page.locator("button[type='submit']");
     await submitBtn.click();
 
-    // Verify error banner is shown
+    // Verify error banner is shown and the form is still there
     await expect(page.locator("div.fstate.e.show")).toBeVisible();
-    await expect(page.locator("div.fstate.s.show")).not.toBeVisible();
+    await expect(page.locator(".cf-done")).toHaveCount(0);
   });
 
   test("fills contact form happy path and submits to the Apps Script endpoint", async ({
@@ -60,17 +60,42 @@ test.describe("Contact Form E2E", () => {
     const submitBtn = page.locator("button[type='submit']");
     await submitBtn.click();
 
-    // Status banner is displayed
-    const statusBanner = page.locator("div.fstate.s.show");
-    await expect(statusBanner).toBeVisible();
-    await expect(statusBanner).toContainText("Thank you!");
+    // The form is replaced by a confirmation addressed by first name
+    const done = page.locator(".cf-done");
+    await expect(done).toBeVisible();
+    await expect(done).toContainText("Thank you, Johnathan!");
 
     expect(body).toMatchObject({
       name: "Johnathan Smith",
       company: "Acme Logistics",
+      email: "john@acme.ae",
+      phone: "+971551234567",
+      website: "https://acme.ae",
       services: ["AI Voice & Calling"],
       hp: "",
     });
+
+    // "Send another message" brings back an empty form
+    await page.getByRole("button", { name: "Send another message" }).click();
+    await expect(page.locator("#f-name")).toHaveValue("");
+  });
+
+  test("picks a country from the searchable list with the keyboard", async ({ page }) => {
+    await page.goto("/contact", { waitUntil: "domcontentloaded" });
+    await waitForIntro(page);
+
+    const button = page.locator(".cs__btn");
+    const search = page.getByRole("combobox", { name: "Search countries" });
+    // The picker only responds once React has hydrated, so retry the key press until it opens.
+    await expect(async () => {
+      await button.focus();
+      await page.keyboard.press("ArrowDown");
+      await expect(search).toBeFocused({ timeout: 500 });
+    }).toPass();
+    await page.keyboard.type("qatar");
+    await page.keyboard.press("Enter");
+    await expect(button).toContainText("+974");
+    await expect(button).toBeFocused();
   });
 
   test("preselects the interest checkbox from ?interest= query param", async ({ page }) => {

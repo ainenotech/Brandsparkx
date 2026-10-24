@@ -1,23 +1,34 @@
 "use client";
 
-import { useEffect, useRef, useState, type FocusEvent, type FormEvent } from "react";
+import {
+  BuildingsIcon,
+  CheckIcon,
+  EnvelopeSimpleIcon,
+  GlobeIcon,
+  UserIcon,
+} from "@phosphor-icons/react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FocusEvent,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
+import { FormSuccess } from "@/components/forms/FormSuccess";
+import { IconField } from "@/components/forms/IconField";
+import { PhoneField } from "@/components/forms/PhoneField";
 import { Icon } from "@/components/Icon";
 import { interests } from "@/content/interests";
 import { postToScript } from "@/lib/postToScript";
-import {
-  contactFields,
-  contactRules,
-  requiredFields,
-  type ContactField,
-} from "@/lib/validation";
+import { contactFields, contactRules, requiredFields, type ContactField } from "@/lib/validation";
 
 type Status = "idle" | "invalid" | "sending" | "sent" | "failed";
 
 const messages: Record<ContactField, string> = {
   name: "Enter your name.",
   email: "Enter a valid email, like name@company.com.",
-  phone: "Use digits, spaces and an optional leading +.",
-  website: "Enter a full address starting with http:// or https://.",
+  phone: "Enter a valid number for the selected country.",
   message: "Tell us a little about what you need (at least 10 characters).",
 };
 
@@ -28,6 +39,9 @@ export function ContactForm() {
   const sending = useRef(false);
   const [errors, setErrors] = useState<Partial<Record<ContactField, boolean>>>({});
   const [status, setStatus] = useState<Status>("idle");
+  // Phone is held in E.164 (e.g. "+971501234567"); undefined while empty.
+  const [phone, setPhone] = useState<string | undefined>();
+  const [sentTo, setSentTo] = useState("");
 
   // `?interest=AI%20Sales` pre-selects that interest; the page also tells the CSS it is the contact page.
   useEffect(() => {
@@ -42,17 +56,20 @@ export function ContactForm() {
   }, []);
 
   const valueOf = (name: ContactField) =>
-    (formRef.current?.elements.namedItem(name) as HTMLInputElement | null)?.value ?? "";
+    name === "phone"
+      ? (phone ?? "")
+      : ((formRef.current?.elements.namedItem(name) as HTMLInputElement | null)?.value ?? "");
 
-  const check = (name: ContactField) => {
-    const ok = contactRules[name](valueOf(name));
+  const check = (name: ContactField, value = valueOf(name)) => {
+    const ok = contactRules[name](value);
     setErrors((e) => ({ ...e, [name]: !ok }));
     return ok;
   };
 
   // Blur and input events bubble up to the form, so one handler covers every field.
+  // Fields are matched by id (`f-<name>`) so the phone input, which has no name, counts too.
   const fieldName = (target: EventTarget) => {
-    const name = (target as HTMLInputElement).name as ContactField;
+    const name = (target as HTMLElement).id?.replace(/^f-/, "") as ContactField;
     return contactFields.includes(name) ? name : null;
   };
 
@@ -65,8 +82,21 @@ export function ContactForm() {
 
   const onInput = (e: FormEvent<HTMLFormElement>) => {
     const name = fieldName(e.target);
-    if (name && errors[name]) check(name);
-    if (status === "sent") setStatus("idle");
+    // Phone re-checks from its own onChange, once the new value is known.
+    if (name && name !== "phone" && errors[name]) check(name);
+  };
+
+  const onPhoneChange = (value?: string) => {
+    setPhone(value);
+    if (errors.phone) check("phone", value ?? "");
+  };
+
+  // Enter toggles a service chip like Space does (instead of submitting the form).
+  const onChipKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.currentTarget.click();
+    }
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -77,7 +107,7 @@ export function ContactForm() {
     const firstInvalid = results.find(([, ok]) => !ok)?.[0];
     if (firstInvalid) {
       setStatus("invalid");
-      (form.elements.namedItem(firstInvalid) as HTMLElement).focus();
+      form.querySelector<HTMLElement>(`#f-${firstInvalid}`)?.focus();
       return;
     }
 
@@ -86,7 +116,7 @@ export function ContactForm() {
       name: String(fd.get("name") ?? "").trim(),
       company: String(fd.get("company") ?? "").trim(),
       email: String(fd.get("email") ?? "").trim(),
-      phone: String(fd.get("phone") ?? "").trim(),
+      phone: phone ?? "",
       website: String(fd.get("website") ?? "").trim(),
       services: fd.getAll("interest").map(String),
       message: String(fd.get("message") ?? "").trim(),
@@ -100,6 +130,8 @@ export function ContactForm() {
       form.reset();
       touched.current.clear();
       setErrors({});
+      setPhone(undefined);
+      setSentTo(payload.name.split(/\s+/)[0]);
       setStatus("sent");
     } catch (err) {
       console.error("Contact form submission failed", err);
@@ -109,24 +141,42 @@ export function ContactForm() {
     }
   };
 
+  if (status === "sent") {
+    return (
+      <FormSuccess
+        title={`Thank you${sentTo ? `, ${sentTo}` : ""}!`}
+        text="We've received your message and will get back to you within 24 hours."
+      >
+        <button type="button" className="btn btn-ghost" onClick={() => setStatus("idle")}>
+          Send another message
+        </button>
+      </FormSuccess>
+    );
+  }
+
   // Shared props for each validated field.
-  const field = (name: ContactField) => ({
-    name,
-    id: `f-${name}`,
-    "aria-invalid": errors[name] || undefined,
-    "aria-describedby": errors[name] ? `f-${name}-msg` : undefined,
-  });
+  const field = (name: ContactField, hint?: boolean) => {
+    const described = [hint && !errors[name] && `f-${name}-hint`, errors[name] && `f-${name}-msg`]
+      .filter(Boolean)
+      .join(" ");
+    return {
+      id: `f-${name}`,
+      "aria-invalid": errors[name] || undefined,
+      "aria-describedby": described || undefined,
+    };
+  };
   const fieldClass = (name: ContactField, full = false) =>
     ["fld", full && "full", errors[name] && "err"].filter(Boolean).join(" ");
-  const errorText = (name: ContactField) => (
-    <span className="msg" id={`f-${name}-msg`}>
-      {messages[name]}
-    </span>
-  );
+  const errorText = (name: ContactField) =>
+    errors[name] && (
+      <span className="msg" id={`f-${name}-msg`}>
+        {messages[name]}
+      </span>
+    );
 
   return (
     <form
-      className="form"
+      className="form cf-form"
       ref={formRef}
       noValidate
       onSubmit={onSubmit}
@@ -135,54 +185,89 @@ export function ContactForm() {
     >
       <div className={fieldClass("name")}>
         <label htmlFor="f-name">
-          Name <i>*</i>
+          Name <i aria-hidden="true">*</i>
         </label>
-        <input {...field("name")} autoComplete="name" required maxLength={100} />
+        <IconField icon={<UserIcon />}>
+          <input
+            {...field("name")}
+            name="name"
+            autoComplete="name"
+            required
+            maxLength={100}
+            placeholder="Your full name"
+          />
+        </IconField>
         {errorText("name")}
       </div>
       <div className="fld">
         <label htmlFor="f-company">Company</label>
-        <input id="f-company" name="company" autoComplete="organization" maxLength={120} />
+        <IconField icon={<BuildingsIcon />}>
+          <input
+            id="f-company"
+            name="company"
+            autoComplete="organization"
+            maxLength={120}
+            placeholder="Company name"
+          />
+        </IconField>
       </div>
       <div className={fieldClass("email")}>
         <label htmlFor="f-email">
-          Work email <i>*</i>
+          Work email <i aria-hidden="true">*</i>
         </label>
-        <input
-          {...field("email")}
-          type="email"
-          autoComplete="email"
-          required
-          maxLength={254}
-          suppressHydrationWarning
-        />
+        <IconField icon={<EnvelopeSimpleIcon />}>
+          <input
+            {...field("email")}
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            maxLength={254}
+            placeholder="you@company.com"
+            suppressHydrationWarning
+          />
+        </IconField>
         {errorText("email")}
       </div>
       <div className={fieldClass("phone")}>
         <label htmlFor="f-phone">WhatsApp / phone</label>
-        <input
-          {...field("phone")}
-          type="tel"
-          autoComplete="tel"
-          placeholder="+971"
-          maxLength={30}
+        <PhoneField
+          id="f-phone"
+          value={phone}
+          onChange={onPhoneChange}
+          invalid={errors.phone}
+          describedBy={field("phone")["aria-describedby"]}
         />
         {errorText("phone")}
       </div>
-      <div className={fieldClass("website", true)}>
+      {/* Optional and not validated: any form of address is fine (www.…, https://…). */}
+      <div className="fld full">
         <label htmlFor="f-website">Website</label>
-        <input {...field("website")} type="url" placeholder="https://" maxLength={200} />
-        {errorText("website")}
+        <IconField icon={<GlobeIcon />}>
+          <input
+            id="f-website"
+            name="website"
+            type="text"
+            inputMode="url"
+            autoComplete="url"
+            maxLength={200}
+            placeholder="yourwebsite.com"
+          />
+        </IconField>
       </div>
-      <fieldset className="fld full" style={{ border: 0 }}>
-        <legend style={{ fontWeight: 500, fontSize: ".9rem", marginBottom: 10 }}>
-          What are you looking to improve?
-        </legend>
+      <fieldset className="fld full cf-services" aria-describedby="f-services-hint">
+        <legend>What are you looking to improve?</legend>
+        <span className="cf-hint" id="f-services-hint">
+          Select all that apply
+        </span>
         <div className="opts">
           {interests.map((x) => (
             <label key={x}>
-              <input type="checkbox" name="interest" value={x} />
-              <span>{x}</span>
+              <input type="checkbox" name="interest" value={x} onKeyDown={onChipKey} />
+              <span>
+                <CheckIcon className="cf-chip-check" weight="bold" aria-hidden="true" />
+                {x}
+              </span>
             </label>
           ))}
         </div>
@@ -198,15 +283,22 @@ export function ContactForm() {
       />
       <div className={fieldClass("message", true)}>
         <label htmlFor="f-message">
-          Message <i>*</i>
+          Message <i aria-hidden="true">*</i>
         </label>
         <textarea
-          {...field("message")}
+          {...field("message", true)}
+          name="message"
           required
           maxLength={2000}
           placeholder="What would you like to improve, automate or build?"
         />
-        {errorText("message")}
+        {errors.message ? (
+          errorText("message")
+        ) : (
+          <span className="cf-hint" id="f-message-hint">
+            At least 10 characters
+          </span>
+        )}
       </div>
 
       <div
@@ -229,21 +321,13 @@ export function ContactForm() {
           </>
         )}
       </div>
-      <div className={status === "sent" ? "fstate s show" : "fstate s"} role="status">
-        {status === "sent" && (
-          <>
-            <Icon name="i-mail" />
-            <span>
-              <b>Thank you!</b> We&apos;ve received your message and will get back to you within
-              24 hours.
-            </span>
-          </>
-        )}
-      </div>
 
-      <button type="submit" className="btn btn-red" disabled={status === "sending"}>
-        {status === "sending" ? "Sending…" : "Send message"} <Icon name="i-arrow" />
-      </button>
+      <div className="cf-submit">
+        <button type="submit" className="btn btn-red" disabled={status === "sending"}>
+          {status === "sending" ? "Sending…" : "Send message"} <Icon name="i-arrow" />
+        </button>
+        <p>We reply within 24 hours. Your details stay private.</p>
+      </div>
     </form>
   );
 }
