@@ -54,7 +54,7 @@ export const team: TeamMember[] = [
     name: "Scott",
     initials: "S",
     role: "Head of Paid Media",
-    bio: "Leads paid media strategy and performance campaigns.",
+    bio: "Leads paid media strategy and campaigns.",
     photo: "/team/scott.webp",
     linkedin: "", // add profile URL
     published: true,

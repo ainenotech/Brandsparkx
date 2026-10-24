@@ -36,4 +36,8 @@ export const clientLogos: ClientLogo[] = [
     height: 161,
   },
   { name: "ZippSlip", logo: "/clients/zippslip.webp", width: 443, height: 168 },
+  { name: "Lodha Group", logo: "/clients/lodha-group.webp", width: 480, height: 77 },
+  { name: "Emaar Properties", logo: "/clients/emaar-properties.webp", width: 480, height: 96 },
+  { name: "IIM Ahmedabad", logo: "/clients/iim-ahmedabad.webp", width: 187, height: 200 },
+  { name: "BigBasket", logo: "/clients/bigbasket.webp", width: 480, height: 177 },
 ];
