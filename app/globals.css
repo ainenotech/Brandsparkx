@@ -34,7 +34,7 @@
   color-scheme: light;
 }
 html {
-  scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 88px);
+  scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 84px);
   scroll-behavior: smooth;
 }
 *,
@@ -227,55 +227,48 @@ section:where(:not([style*="background"], .dark-sec))
 }
 
 /* header */
+/* Full-width frosted glass pinned flush to the top; a soft shadow lifts it once the page scrolls. */
 .hdr {
-  --hdr-h: 68px;
-  --hdr-gap: 10px;
+  --hdr-h: 72px;
   --hdr-glide: cubic-bezier(0.22, 1, 0.36, 1);
   position: sticky;
   top: 0;
   z-index: 50;
-  padding-top: var(--hdr-gap);
-  transition: background-color 0.3s var(--ease);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.62));
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.55);
+  transition:
+    background-color 0.3s var(--ease),
+    box-shadow 0.4s var(--ease);
 }
-/* The bar itself is a floating pane of frosted glass with a lit edge all the way round. */
+.hdr.scrolled {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.74));
+  box-shadow:
+    inset 0 -1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 0 rgba(16, 16, 20, 0.03),
+    0 12px 32px -18px rgba(16, 16, 20, 0.22);
+}
 .hdr .wrap {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: clamp(16px, 2vw, 32px);
-  width: min(calc(100% - 2 * var(--hdr-gap)), 1320px);
-  max-width: none;
+  width: 100%;
+  max-width: 1320px;
   height: var(--hdr-h);
   margin: 0 auto;
-  padding: 0 clamp(14px, 2vw, 26px);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.5));
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-  backdrop-filter: blur(22px) saturate(180%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.35),
-    0 0 0 1px rgba(16, 16, 20, 0.05),
-    0 10px 30px -12px rgba(16, 16, 20, 0.14);
-  transition:
-    height 0.4s var(--hdr-glide),
-    background-color 0.3s var(--ease),
-    box-shadow 0.3s var(--ease);
-}
-.hdr.scrolled .wrap {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.4),
-    0 0 0 1px rgba(16, 16, 20, 0.06),
-    0 16px 40px -14px rgba(16, 16, 20, 0.22);
+  padding: 0 clamp(20px, 4vw, 48px);
+  transition: height 0.4s var(--hdr-glide);
 }
 .hdr .logo {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
+  transition: opacity 0.25s var(--ease);
+}
+.hdr .logo:hover {
+  opacity: 0.8;
 }
 .hdr .logo img {
   height: 28px;
@@ -288,64 +281,92 @@ section:where(:not([style*="background"], .dark-sec))
   min-width: 0;
   gap: clamp(12px, 1.6vw, 28px);
 }
+/* The links sit in a recessed glass track, like a segmented control. */
 .nav-links {
   position: relative;
   display: flex;
   align-items: center;
   gap: 2px;
   margin-inline: auto;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(16, 16, 20, 0.035);
+  box-shadow:
+    inset 0 0 0 1px rgba(16, 16, 20, 0.045),
+    inset 0 1px 2px rgba(16, 16, 20, 0.04);
 }
 .nav-links a {
   position: relative;
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  height: 38px;
-  padding: 0 clamp(10px, 0.85vw, 15px);
+  height: 36px;
+  padding: 0 clamp(11px, 0.95vw, 16px);
   border-radius: 999px;
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: -0.005em;
-  color: #4a4a53;
+  color: #5a5a63;
   white-space: nowrap;
-  transition: color 0.25s var(--ease);
+  transition: color 0.3s var(--ease);
 }
 .nav-links a:hover,
 .nav-links a:focus-visible,
 .nav-links a.active {
   color: var(--ink);
 }
-/* Hover pill and active bar: one shared element each, positioned from Header.tsx. */
-.nav-pill,
-.nav-bar {
+.nav-links a:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+/* On hover the label rolls up and an identical copy rises in from below. */
+.nav-label {
+  display: block;
+  height: 1.3em;
+  overflow: hidden;
+  line-height: 1.3;
+}
+.nav-roll {
+  display: block;
+  transition: transform 0.55s var(--hdr-glide);
+}
+.nav-roll::after {
+  content: attr(data-text);
+  content: attr(data-text) / "";
+  display: block;
+}
+.nav-links a:hover .nav-roll,
+.nav-links a:focus-visible .nav-roll {
+  transform: translateY(-50%);
+}
+/* Active chip and hover pill: one shared element each, positioned from Header.tsx. */
+.nav-active,
+.nav-pill {
   position: absolute;
+  top: 50%;
   left: 0;
   width: var(--w, 0px);
+  height: 36px;
+  border-radius: 999px;
   pointer-events: none;
   opacity: 0;
 }
-.nav-pill {
-  top: 50%;
-  height: 38px;
-  border-radius: 999px;
-  background: rgba(16, 16, 20, 0.05);
-  box-shadow: inset 0 0 0 1px rgba(16, 16, 20, 0.035);
-  transform: translate(var(--x, 0px), -50%) scale(0.9);
+.nav-active {
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(16, 16, 20, 0.05),
+    0 1px 2px rgba(16, 16, 20, 0.06),
+    0 6px 16px -6px rgba(16, 16, 20, 0.16);
+  transform: translate(var(--x, 0px), -50%);
 }
+.nav-pill {
+  background: rgba(16, 16, 20, 0.055);
+  transform: translate(var(--x, 0px), -50%) scale(0.88);
+}
+.nav-active[data-on],
 .nav-pill[data-on] {
   opacity: 1;
   transform: translate(var(--x, 0px), -50%);
-}
-.nav-bar {
-  bottom: 3px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--red);
-  transform: translateX(var(--x, 0px)) scaleX(0);
-}
-.nav-bar[data-on] {
-  opacity: 1;
-  transform: translateX(var(--x, 0px));
 }
 .nav-pill[data-glide] {
   transition:
@@ -353,11 +374,11 @@ section:where(:not([style*="background"], .dark-sec))
     transform 0.45s var(--hdr-glide),
     width 0.45s var(--hdr-glide);
 }
-.nav-bar[data-glide] {
+.nav-active[data-glide] {
   transition:
     opacity 0.3s var(--ease),
-    transform 0.55s var(--hdr-glide),
-    width 0.55s var(--hdr-glide);
+    transform 0.6s var(--hdr-glide),
+    width 0.6s var(--hdr-glide);
 }
 
 /* Contact CTA: red fill rises from below, a sheen sweeps across, the arrow swaps out. */
@@ -464,25 +485,6 @@ section:where(:not([style*="background"], .dark-sec))
   transition-duration: 0.1s;
 }
 
-/* Reading progress along the bottom edge of the glass. */
-.hdr-progress {
-  position: absolute;
-  left: 22px;
-  right: 22px;
-  bottom: -1px;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--red-d), var(--red));
-  transform: scaleX(var(--hdr-progress, 0));
-  transform-origin: left;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s var(--ease);
-}
-.hdr.scrolled .hdr-progress {
-  opacity: 1;
-}
-
 /* Nav items fade in one after another, held back until the brand intro hands off the logo. */
 @keyframes hdr-item-in {
   from {
@@ -568,19 +570,14 @@ html[data-brand-intro-pending] .burger {
 }
 .menu-open .hdr {
   background: #fff;
-}
-.menu-open .hdr .wrap {
-  background: #fff;
-}
-.menu-open .hdr-progress {
-  opacity: 0;
+  box-shadow: 0 1px 0 var(--line);
 }
 
 /* Mobile menu: the panel wipes down, then the links and contact details rise in turn. */
 .mnav {
   position: fixed;
   inset: 0;
-  top: calc(78px + env(safe-area-inset-top, 0px));
+  top: calc(72px + env(safe-area-inset-top, 0px));
   z-index: 49;
   display: flex;
   flex-direction: column;
@@ -740,7 +737,7 @@ html[data-brand-intro-pending] .burger {
 
 @media (min-width: 1101px) {
   .hdr.scrolled {
-    --hdr-h: 60px;
+    --hdr-h: 64px;
   }
 }
 @media (max-width: 1100px) {

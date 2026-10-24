@@ -15,7 +15,7 @@ const ctaLink = nav.find((item) => item.href === CTA_HREF);
 type Box = { x: number; w: number };
 
 /**
- * Moves a nav marker (hover pill or active bar) onto a box. It glides when it is already
+ * Moves a nav marker (hover pill or active chip) onto a box. It glides when it is already
  * showing and snaps into place when it first appears, so it never sweeps in from the left edge.
  */
 function moveMarker(marker: HTMLElement, box: Box | null, animate: boolean) {
@@ -39,10 +39,9 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPath, setMenuPath] = useState(pathname);
-  const headerRef = useRef<HTMLElement>(null);
   const linksRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLSpanElement>(null);
-  const barRef = useRef<HTMLSpanElement>(null);
+  const activeRef = useRef<HTMLSpanElement>(null);
   const burgerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -52,17 +51,12 @@ export function Header() {
     setMenuOpen(false);
   }
 
-  // Scroll drives the compact "scrolled" look and the reading-progress line
-  // (written straight to a CSS variable to skip re-renders). The header stays pinned throughout.
+  // Scroll only switches on the compact "scrolled" look; the header stays pinned throughout.
   useEffect(() => {
-    const header = headerRef.current;
     let frame = 0;
     const update = () => {
       frame = 0;
-      const y = Math.max(0, window.scrollY);
-      const room = document.documentElement.scrollHeight - window.innerHeight;
-      header?.style.setProperty("--hdr-progress", room > 0 ? String(Math.min(1, y / room)) : "0");
-      setScrolled(y > 10);
+      setScrolled(window.scrollY > 10);
     };
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(update);
@@ -77,33 +71,28 @@ export function Header() {
     };
   }, []);
 
-  // The active bar sits under the current page's label and glides across on navigation.
-  const syncActiveBar = useCallback((animate: boolean) => {
+  // The active chip sits behind the current page's link and glides across on navigation.
+  const syncActiveChip = useCallback((animate: boolean) => {
     const links = linksRef.current;
-    const bar = barRef.current;
-    if (!links || !bar) return;
+    const chip = activeRef.current;
+    if (!links || !chip) return;
     const link = links.querySelector<HTMLElement>('a[aria-current="page"]');
-    const label = link?.querySelector<HTMLElement>(".nav-label");
-    moveMarker(
-      bar,
-      link && label ? { x: link.offsetLeft + label.offsetLeft, w: label.offsetWidth } : null,
-      animate,
-    );
+    moveMarker(chip, link ? { x: link.offsetLeft, w: link.offsetWidth } : null, animate);
   }, []);
 
   useLayoutEffect(() => {
-    syncActiveBar(true);
-  }, [pathname, syncActiveBar]);
+    syncActiveChip(true);
+  }, [pathname, syncActiveChip]);
 
   // Re-measure without animating when the nav reflows (resize, web fonts swapping in).
   useEffect(() => {
     const links = linksRef.current;
     if (!links || typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(() => syncActiveBar(false));
+    const observer = new ResizeObserver(() => syncActiveChip(false));
     observer.observe(links);
-    document.fonts?.ready.then(() => syncActiveBar(false));
+    document.fonts?.ready.then(() => syncActiveChip(false));
     return () => observer.disconnect();
-  }, [syncActiveBar]);
+  }, [syncActiveChip]);
 
   const showPill = (e: PointerEvent<HTMLAnchorElement> | FocusEvent<HTMLAnchorElement>) => {
     const link = e.currentTarget;
@@ -146,7 +135,7 @@ export function Header() {
 
   return (
     <>
-      <header ref={headerRef} className={scrolled ? "hdr scrolled" : "hdr"}>
+      <header className={scrolled ? "hdr scrolled" : "hdr"}>
         <div className="wrap">
           <Link href="/" className="logo" aria-label="BrandSparkX home">
             <Image
@@ -167,6 +156,7 @@ export function Header() {
                 if (!e.currentTarget.contains(e.relatedTarget as Node | null)) hidePill();
               }}
             >
+              <span ref={activeRef} className="nav-active" aria-hidden="true" />
               <span ref={pillRef} className="nav-pill" aria-hidden="true" />
               {primaryLinks.map((item, i) => (
                 <Link
@@ -178,10 +168,13 @@ export function Header() {
                   onPointerEnter={showPill}
                   onFocus={showPill}
                 >
-                  <span className="nav-label">{item.label}</span>
+                  <span className="nav-label">
+                    <span className="nav-roll" data-text={item.label}>
+                      {item.label}
+                    </span>
+                  </span>
                 </Link>
               ))}
-              <span ref={barRef} className="nav-bar" aria-hidden="true" />
             </div>
             {ctaLink && (
               <Link
@@ -209,7 +202,6 @@ export function Header() {
           >
             <span />
           </button>
-          <span className="hdr-progress" aria-hidden="true" />
         </div>
       </header>
       <div className="mnav" id="mnav" ref={menuRef}>
