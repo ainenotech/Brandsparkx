@@ -34,7 +34,7 @@ export const team: TeamMember[] = [
   {
     name: "Ratnesh",
     initials: "R",
-    role: "Strategic Partner · Growth & Marketing",
+    role: "Partner | High Growth Strategist",
     bio: "Growth strategy, customer acquisition and marketing expertise.",
     photo: "/team/ratnesh.jpeg",
     published: true,
