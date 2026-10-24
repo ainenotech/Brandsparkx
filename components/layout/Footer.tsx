@@ -1,16 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
+import { Skyline } from "@/components/layout/Skyline";
 import { site } from "@/content/site";
 import { solutionHref, solutions } from "@/content/solutions";
 
+// AI Marketing and AI Sales are left out of the footer only (still in the nav and pages).
 // AI Voice & Calling leads as the main offering; the rest follow the original site order.
 const footerSolutions = [
   "ai-voice-calling",
   "ai-growth",
   "ai-content",
-  "ai-marketing",
-  "ai-sales",
   "ai-engineers",
   "business-automation",
 ]
@@ -19,6 +19,11 @@ const footerSolutions = [
     href: solutionHref(s),
     label: s.slug === "ai-engineers" ? "AI Engineers" : s.title,
   }));
+
+// Footer shows office names only; each opens the full address (site.offices) in Google Maps.
+const mapsHref = (address: string) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+const officeName = (city: string) => city.split(",")[0];
 
 export function Footer() {
   return (
@@ -33,37 +38,7 @@ export function Footer() {
         </span>
       </div>
 
-      <div className="skyline" aria-hidden="true">
-        <svg viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice">
-          <g fill="#16161C">
-            <rect x="40" y="150" width="60" height="110" />
-            <rect x="110" y="120" width="44" height="140" />
-            <rect x="164" y="170" width="70" height="90" />
-            <rect x="250" y="90" width="50" height="170" />
-            <polygon points="320,260 320,110 350,80 380,110 380,260" />
-            <rect x="395" y="140" width="80" height="120" />
-            <rect x="490" y="60" width="46" height="200" />
-            <rect x="550" y="130" width="64" height="130" />
-            <rect x="630" y="100" width="40" height="160" />
-            <rect x="900" y="120" width="56" height="140" />
-            <polygon points="970,260 970,70 1010,50 1010,260" />
-            <rect x="1025" y="140" width="70" height="120" />
-            <rect x="1110" y="95" width="48" height="165" />
-            <rect x="1170" y="160" width="90" height="100" />
-            <rect x="1275" y="110" width="44" height="150" />
-            <rect x="1330" y="150" width="80" height="110" />
-          </g>
-          <g fill="#1E1E25">
-            {/* tall needle tower */}
-            <polygon points="760,260 772,40 780,0 788,40 800,260" />
-            <polygon points="740,260 760,120 760,260" />
-            <polygon points="800,260 800,120 820,260" />
-            <polygon points="690,260 700,140 730,150 730,260" />
-            <polygon points="830,260 830,150 860,140 870,260" />
-          </g>
-          <line x1="0" y1="259.5" x2="1440" y2="259.5" stroke="#D83232" strokeOpacity=".5" />
-        </svg>
-      </div>
+      <Skyline />
 
       <div className="wrap ftr-top">
         <div>
@@ -82,30 +57,21 @@ export function Footer() {
             Grow with AI.
           </div>
           <p>{site.description}</p>
-          <div className="soc">
-            <a
-              href={site.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="WhatsApp"
-            >
-              <Icon name="i-wa" />
-            </a>
-            <a href={`mailto:${site.email}`} aria-label="Email">
-              <Icon name="i-mail" />
-            </a>
-            {site.socials.map((s) => (
-              <a
-                key={s.href}
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={s.label}
-              >
-                <Icon name={s.label === "Instagram" ? "i-ig" : "i-in"} />
-              </a>
-            ))}
-          </div>
+          {site.socials.length > 0 && (
+            <div className="soc">
+              {site.socials.map((s) => (
+                <a
+                  key={s.href}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                >
+                  <Icon name={s.label === "Instagram" ? "i-ig" : "i-in"} />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
@@ -125,6 +91,25 @@ export function Footer() {
                 {site.email}
               </span>
             </a>
+            <div className="cl-row">
+              <Link href="/contact" className="cl-link">
+                <Icon name="i-arrow" />
+                <span>Contact us</span>
+              </Link>
+              <div className="soc">
+                <a
+                  href={site.whatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="WhatsApp"
+                >
+                  <Icon name="i-wa" />
+                </a>
+                <a href={`mailto:${site.email}`} aria-label="Email">
+                  <Icon name="i-mail" />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -145,7 +130,7 @@ export function Footer() {
                 {site.careers.email}
               </span>
             </a>
-            <Link href="/careers">
+            <Link href="/careers" className="cl-link">
               <Icon name="i-arrow" />
               <span>View careers</span>
             </Link>
@@ -167,13 +152,27 @@ export function Footer() {
           <h2 className="fh">Our locations</h2>
           <div className="ftr-locs__grid">
             {site.offices.map((o) => (
-              <div className="loc" key={o.city}>
+              <a
+                className="loc"
+                key={o.city}
+                href={mapsHref(o.address)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${officeName(o.city)} office in Google Maps`}
+              >
                 <Icon name="i-pin" />
-                <address>
-                  <strong>{o.city}</strong>
-                  {o.address}
-                </address>
-              </div>
+                <span>{o.city}</span>
+                <svg className="loc__ext" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                  <path
+                    d="M9 3h4v4M13 3 7.5 8.5M11 9.5V13H3V5h3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </a>
             ))}
           </div>
         </div>

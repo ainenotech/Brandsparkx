@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { Footer } from "@/components/layout/Footer";
 import { site } from "@/content/site";
@@ -45,5 +45,44 @@ describe("Footer Component", () => {
     expect(solutionLinks.length).toBeGreaterThan(0);
     expect(solutionLinks[0].textContent).toBe("AI Voice & Calling");
     expect(solutionLinks[0].getAttribute("href")).toBe("/ai-voice-calling");
+  });
+
+  it("leaves AI Marketing and AI Sales out of the footer solutions", () => {
+    render(<Footer />);
+
+    expect(screen.queryByRole("link", { name: "AI Marketing" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "AI Sales" })).not.toBeInTheDocument();
+  });
+
+  it("shows office names only, each opening its full address in Google Maps", () => {
+    const { container } = render(<Footer />);
+
+    for (const office of site.offices) {
+      const name = office.city.split(",")[0];
+      const link = screen.getByRole("link", { name: `Open ${name} office in Google Maps` });
+      expect(link).toHaveTextContent(office.city);
+      expect(link).toHaveAttribute(
+        "href",
+        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(office.address)}`,
+      );
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+      expect(container).not.toHaveTextContent(office.address);
+    }
+  });
+
+  it("puts the WhatsApp and Email buttons beside the Contact us link", () => {
+    render(<Footer />);
+
+    const row = screen.getByRole("link", { name: "Contact us" }).closest(".cl-row")!;
+    expect(row).not.toBeNull();
+    expect(within(row as HTMLElement).getByRole("link", { name: "WhatsApp" })).toHaveAttribute(
+      "href",
+      site.whatsappHref,
+    );
+    expect(within(row as HTMLElement).getByRole("link", { name: "Email" })).toHaveAttribute(
+      "href",
+      `mailto:${site.email}`,
+    );
   });
 });

@@ -3197,6 +3197,11 @@ fieldset.fld {
 
 /* footer */
 .ftr {
+  /* BRANDSPARKX watermark size, and the height of .ftr-bot it sits on. */
+  --ftr-mark: clamp(36px, 9vw, 132px);
+  --ftr-bot-h: 64px;
+  /* Room under the office names; the skyline is sized from it (see .skyline). */
+  --locs-pb: 64px;
   background: #0a0a0d;
   color: #fff;
   position: relative;
@@ -3216,21 +3221,165 @@ fieldset.fld {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 70px;
-  height: 260px;
-  opacity: 0.5;
+  bottom: calc(var(--ftr-bot-h) + 6px);
+  /* Sized from the room between the office names and the ground (names padding + watermark
+     band), so the tallest regular rooftop (145 of the 232 viewBox units) ends ~24px below the
+     names: height = 232/145 × (room − 24px). The Burj alone rises higher, between the names.
+     The soft top fade keeps the spire tip from ending in a hard edge. */
+  height: calc(1.6 * (var(--locs-pb) + var(--ftr-mark) - 18px));
+  opacity: 0.85;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18px);
+  mask-image: linear-gradient(to bottom, transparent, #000 18px);
 }
 .skyline svg {
   width: 100%;
   height: 100%;
+}
+/* Slow, calm window blinks, star twinkles and aviation beacons; only run while the
+   skyline is on screen. */
+.sk-blink {
+  animation: sk-blink var(--sk-dur, 5s) ease-in-out var(--sk-delay, 0s) infinite;
+  animation-play-state: paused;
+}
+.sk-beacon {
+  animation: sk-beacon 2s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.sk-twinkle {
+  animation: sk-twinkle 5s ease-in-out infinite;
+  animation-play-state: paused;
+}
+/* Every ~13s a soft light band climbs the Burj facade (a hint of its LED show). */
+.sk-sweep {
+  opacity: 0;
+  animation: sk-sweep 13s ease-in-out 2s infinite;
+  animation-play-state: paused;
+}
+/* Car lights drift along the road line. */
+.sk-car {
+  opacity: 0.4;
+  animation: sk-car 30s linear infinite;
+  animation-play-state: paused;
+}
+.skyline[data-inview] :is(.sk-blink, .sk-beacon, .sk-twinkle, .sk-sweep, .sk-car) {
+  animation-play-state: running;
+}
+@keyframes sk-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.12;
+  }
+}
+@keyframes sk-beacon {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+@keyframes sk-sweep {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  3% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 1;
+  }
+  24%,
+  100% {
+    opacity: 0;
+    transform: translateY(-212px);
+  }
+}
+@keyframes sk-car {
+  to {
+    transform: translateX(2440px);
+  }
+}
+@keyframes sk-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+/* Hovering or focusing an office lights up the buildings under its column. */
+.sk-hover,
+.sk-roof-glow {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.sk-roof {
+  opacity: 0.45;
+  transition: opacity 0.4s ease;
+}
+@media (hover: hover) and (pointer: fine) and (min-width: 981px) and (prefers-reduced-motion: no-preference) {
+  .ftr:has(.loc:nth-child(1):is(:hover, :focus-visible)) .sk-c1.sk-hover,
+  .ftr:has(.loc:nth-child(1):is(:hover, :focus-visible)) .sk-c1 .sk-roof-glow,
+  .ftr:has(.loc:nth-child(1):is(:hover, :focus-visible)) .sk-c1 .sk-roof {
+    opacity: 1;
+    animation: none;
+  }
+  .ftr:has(.loc:nth-child(2):is(:hover, :focus-visible)) .sk-c2.sk-hover,
+  .ftr:has(.loc:nth-child(2):is(:hover, :focus-visible)) .sk-c2 .sk-roof-glow,
+  .ftr:has(.loc:nth-child(2):is(:hover, :focus-visible)) .sk-c2 .sk-roof {
+    opacity: 1;
+    animation: none;
+  }
+  .ftr:has(.loc:nth-child(3):is(:hover, :focus-visible)) .sk-c3.sk-hover,
+  .ftr:has(.loc:nth-child(3):is(:hover, :focus-visible)) .sk-c3 .sk-roof-glow,
+  .ftr:has(.loc:nth-child(3):is(:hover, :focus-visible)) .sk-c3 .sk-roof {
+    opacity: 1;
+    animation: none;
+  }
+  .ftr:has(.loc:nth-child(4):is(:hover, :focus-visible)) .sk-c4.sk-hover,
+  .ftr:has(.loc:nth-child(4):is(:hover, :focus-visible)) .sk-c4 .sk-roof-glow,
+  .ftr:has(.loc:nth-child(4):is(:hover, :focus-visible)) .sk-c4 .sk-roof {
+    opacity: 1;
+    animation: none;
+  }
+}
+@media (max-width: 767px) {
+  .skyline :is(.sk-sparse, .sk-back, .sk-car) {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  /* The name columns are too close for the Burj to rise between them, so here the whole
+     scene, Burj tip included (220 of 232 units), stays below the names:
+     height = 232/220 × (room − 16px). */
+  .skyline {
+    height: calc(1.055 * (var(--locs-pb) + var(--ftr-mark) - 10px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-blink,
+  .sk-beacon,
+  .sk-twinkle {
+    animation: none;
+  }
+  .sk-sweep,
+  .sk-car {
+    display: none;
+  }
 }
 /* Big outlined brand watermark inside footer */
 .ftr-brand-bg {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 64px;
+  bottom: var(--ftr-bot-h);
   display: flex;
   justify-content: center;
   pointer-events: none;
@@ -3240,12 +3389,12 @@ fieldset.fld {
 .ftr-brand-bg span {
   font-family: var(--display);
   font-weight: 800;
-  font-size: clamp(64px, 11vw, 160px);
+  font-size: var(--ftr-mark);
   letter-spacing: -0.03em;
   line-height: 1;
   white-space: nowrap;
   color: transparent;
-  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.13);
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2);
   perspective: 700px;
   transform-style: preserve-3d;
   user-select: none;
@@ -3274,7 +3423,7 @@ fieldset.fld {
   /* Vertical only, so .wrap keeps its side gutters. Bottom padding is the room for the
      BRANDSPARKX watermark (same size as its font-size). */
   padding-top: clamp(48px, 6vw, 72px);
-  padding-bottom: calc(clamp(64px, 11vw, 160px) + 12px);
+  padding-bottom: calc(var(--ftr-mark) + 12px);
   position: relative;
   z-index: 3;
   pointer-events: none;
@@ -3318,28 +3467,42 @@ fieldset.fld {
 .ftr ul a {
   transition: color 0.2s;
 }
-.ftr ul a:hover,
-.ftr .loc a:hover {
+.ftr ul a:hover {
   color: #fff;
 }
-.loc {
-  display: flex;
-  gap: 14px;
-  margin-bottom: 24px;
+/* Office names: each opens Google Maps; hover/focus also lights its skyline column. */
+.ftr .loc {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.2s;
 }
-.loc svg {
+.ftr .loc svg {
   width: 18px;
   height: 18px;
   flex: none;
   color: var(--red);
-  margin-top: 3px;
 }
-.loc strong {
-  display: block;
-  color: #fff;
-  font-weight: 600;
-  margin-bottom: 4px;
-  font-size: 0.95rem;
+.ftr .loc .loc__ext {
+  width: 13px;
+  height: 13px;
+  color: currentColor;
+  opacity: 0;
+  transform: translate(-3px, 3px);
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+.ftr .loc:is(:hover, :focus-visible) {
+  color: #e11d2e;
+}
+.ftr .loc:is(:hover, :focus-visible) .loc__ext {
+  opacity: 1;
+  transform: none;
 }
 .ftr .soc {
   margin-top: 26px;
@@ -3376,6 +3539,25 @@ fieldset.fld {
   color: var(--red);
   flex: none;
 }
+.cl .cl-link span {
+  text-decoration: underline;
+  text-decoration-color: var(--red);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+/* "Contact us" link with the WhatsApp / Mail buttons beside it. */
+.cl-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.cl-row .soc {
+  margin-top: 0;
+}
+.cl .soc a {
+  display: grid;
+  gap: 0;
+}
 .cl small {
   display: block;
   color: #7e7e88;
@@ -3384,16 +3566,17 @@ fieldset.fld {
 /* Offices run as one row across the bottom of the footer. */
 .ftr-locs {
   grid-column: 1 / -1;
-  padding-top: clamp(24px, 2.5vw, 32px);
+  padding-top: clamp(8px, 0.85vw, 12px);
+  padding-bottom: var(--locs-pb);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ftr-locs .fh {
+  margin-bottom: 16px;
 }
 .ftr-locs__grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(20px, 3vw, 40px);
-}
-.ftr-locs .loc {
-  margin-bottom: 0;
+  gap: 18px clamp(20px, 3vw, 40px);
 }
 .ftr-bot {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -3422,6 +3605,10 @@ fieldset.fld {
   color: #fff;
 }
 @media (max-width: 980px) {
+  .ftr {
+    /* Names wrap to two rows here; give the skyline more room below them. */
+    --locs-pb: 96px;
+  }
   .ftr-top {
     grid-template-columns: 1fr 1fr;
   }
@@ -3430,11 +3617,24 @@ fieldset.fld {
   }
 }
 @media (max-width: 600px) {
+  .ftr {
+    /* Bigger vw share so the wordmark still fills the narrow content width,
+       and it sits on the taller stacked bottom bar. */
+    --ftr-mark: 11.5vw;
+    --ftr-bot-h: 112px;
+    --locs-pb: 150px;
+  }
   .ftr-top {
     grid-template-columns: 1fr;
   }
   .ftr-locs__grid {
-    grid-template-columns: 1fr;
+    gap: 14px 12px;
+  }
+  .ftr .loc {
+    gap: 8px;
+  }
+  .ftr .loc .loc__ext {
+    display: none;
   }
   .ftr-bot {
     flex-direction: column;
@@ -6170,7 +6370,8 @@ body.menu-open {
     align-items: center;
     min-height: 44px;
   }
-  .cl a {
+  .cl a,
+  .ftr .loc {
     min-height: 44px;
   }
   .soc a,
